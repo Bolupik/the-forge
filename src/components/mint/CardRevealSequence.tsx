@@ -28,6 +28,39 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
   const [showcaseIdx, setShowcaseIdx] = useState<number | null>(null);
   const [shake, setShake] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const { userData } = useStacksAuth();
+  const contractCfg = getContractConfig();
+  const [mintState, setMintState] = useState<'idle' | 'minting' | 'done' | 'error'>('idle');
+  const [mintProgress, setMintProgress] = useState(0);
+  const [mintError, setMintError] = useState<string | null>(null);
+  const [txids, setTxids] = useState<string[]>([]);
+
+  const handleMintToWallet = async () => {
+    if (!userData?.address || !contractCfg) return;
+    setMintState('minting');
+    setMintError(null);
+    setMintProgress(0);
+    const ids: string[] = [];
+    try {
+      for (let i = 0; i < cards.length; i++) {
+        const { txid } = await mintCardOnChain({ card: cards[i], recipient: userData.address });
+        ids.push(txid);
+        setTxids([...ids]);
+        setMintProgress(i + 1);
+      }
+      setMintState('done');
+      playSuccess();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Mint failed';
+      // user cancelled wallet popup → silent reset
+      if (/cancel|reject|denied/i.test(msg)) {
+        setMintState('idle');
+        return;
+      }
+      setMintError(msg);
+      setMintState('error');
+    }
+  };
 
   // Auto-reveal sequence
   useEffect(() => {
