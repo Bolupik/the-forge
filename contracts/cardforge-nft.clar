@@ -1,12 +1,16 @@
 ;; CardForge NFT — SIP-009 compliant
-;; One contract for the whole collection; each minted card stores its own
-;; token URI pointing to OpenSea-style metadata JSON.
+;; Self-contained: defines and implements the SIP-009 nft-trait inline so it
+;; works on devnet/testnet/mainnet without needing an external trait contract
+;; to be deployed first.
 
-;; SIP-009 NFT trait. Use the testnet address when deploying to testnet,
-;; and the mainnet address when deploying to mainnet. Swap before deploy.
-;; Testnet: 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.nft-trait.nft-trait
-;; Mainnet: 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.nft-trait
-(impl-trait 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.nft-trait.nft-trait)
+(define-trait nft-trait
+  (
+    (get-last-token-id () (response uint uint))
+    (get-token-uri (uint) (response (optional (string-ascii 256)) uint))
+    (get-owner (uint) (response (optional principal) uint))
+    (transfer (uint principal principal) (response bool uint))
+  )
+)
 
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant ERR-OWNER-ONLY (err u100))
@@ -20,7 +24,7 @@
 ;; Per-token metadata URI (https or ipfs)
 (define-map token-uris uint (string-ascii 256))
 
-;; -------- SIP-009 trait --------
+;; -------- SIP-009 --------
 
 (define-read-only (get-last-token-id)
   (ok (var-get last-token-id)))
@@ -38,8 +42,6 @@
 
 ;; -------- Mint --------
 
-;; Public, free-to-mint. Recipient must equal tx-sender so users can only
-;; mint cards into their own wallet.
 (define-public (mint (recipient principal) (token-uri (string-ascii 256)))
   (let ((next-id (+ (var-get last-token-id) u1)))
     (asserts! (is-eq tx-sender recipient) ERR-NOT-TOKEN-OWNER)
@@ -49,7 +51,6 @@
     (print { event: "mint", id: next-id, recipient: recipient, uri: token-uri })
     (ok next-id)))
 
-;; Admin: overwrite metadata URI (e.g. art freeze, IPFS migration)
 (define-public (set-token-uri (token-id uint) (token-uri (string-ascii 256)))
   (begin
     (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-OWNER-ONLY)
