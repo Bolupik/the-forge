@@ -284,6 +284,68 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
           )}
         </div>
 
+        {/* Fighting-Pokémon variant picker */}
+        {originalImageUrl && (
+          <div className="mb-5">
+            <SectionLabel text="Choose Variant" />
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'original' as const, label: 'Original', src: originalImageUrl },
+                { key: 'transformed' as const, label: 'Fighting ⚔', src: transformedImageUrl },
+              ].map((opt) => {
+                const active = pickedVariant === opt.key;
+                const isLoading = opt.key === 'transformed' && transformState === 'loading';
+                const isError = opt.key === 'transformed' && transformState === 'error';
+                const disabled = opt.key === 'transformed' && !transformedImageUrl;
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => !disabled && pickVariant(opt.key)}
+                    disabled={disabled}
+                    className="relative flex flex-col items-center gap-1 p-2 rounded-lg transition-all duration-200 disabled:cursor-not-allowed"
+                    style={{
+                      border: `1.5px solid ${active ? 'var(--cf-gold)' : 'var(--cf-border2)'}`,
+                      background: active ? 'rgba(200,168,75,0.08)' : 'transparent',
+                      boxShadow: active ? '0 0 12px rgba(200,168,75,0.2)' : 'none',
+                      opacity: disabled ? 0.5 : 1,
+                    }}
+                  >
+                    <div className="w-full aspect-square rounded overflow-hidden flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                      {opt.src ? (
+                        <img src={opt.src} alt={opt.label} className="w-full h-full object-cover" />
+                      ) : isLoading ? (
+                        <span className="font-ui text-[0.55rem] animate-pulse" style={{ color: 'var(--cf-gold)' }}>Generating…</span>
+                      ) : isError ? (
+                        <span className="font-ui text-[0.55rem]" style={{ color: '#f87171' }}>Failed</span>
+                      ) : (
+                        <span className="font-ui text-[0.55rem]" style={{ color: 'var(--cf-muted)' }}>—</span>
+                      )}
+                    </div>
+                    <span className="font-ui text-[0.55rem] uppercase tracking-wider" style={{ color: active ? 'var(--cf-gold)' : 'var(--cf-muted2)' }}>
+                      {opt.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {transformState === 'done' && (
+              <button
+                type="button"
+                onClick={() => runTransform(originalImageUrl)}
+                className="w-full mt-2 py-1.5 font-ui text-[0.55rem] uppercase tracking-wider rounded transition-colors"
+                style={{ border: '1px solid var(--cf-border2)', color: 'var(--cf-muted2)' }}
+              >
+                ↻ Regenerate fighting variant
+              </button>
+            )}
+            {transformError && (
+              <p className="font-body text-[0.55rem] mt-2 text-center" style={{ color: '#f87171' }}>{transformError}</p>
+            )}
+          </div>
+        )}
+
+
         {/* Card Identity */}
         <SectionLabel text="Card Identity" />
         <input
