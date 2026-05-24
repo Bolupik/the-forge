@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { NFTCard, Rarity } from '@/lib/cardforge';
 import { playCardFlip, playRareReveal, playSuccess, playClick } from '@/lib/sounds';
 import NFTCardComponent from '@/components/NFTCard';
+import { useStacksAuth } from '@/contexts/StacksAuthContext';
+import { mintCardOnChain, getContractConfig, explorerTxUrl } from '@/lib/stacksMint';
 
 interface CardRevealSequenceProps {
   cards: NFTCard[];
