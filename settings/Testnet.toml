@@ -1,0 +1,7 @@
+[network]
+name = "testnet"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "<YOUR TESTNET MNEMONIC>"
+balance = 100_000_000_000_000

@@ -1,0 +1,16 @@
+[project]
+name = "cardforge"
+description = "CardForge NFT collection (SIP-009)"
+authors = []
+telemetry = true
+cache_dir = ".cache"
+requirements = []
+
+[contracts.cardforge-nft]
+path = "contracts/cardforge-nft.clar"
+clarity_version = 2
+epoch = 2.4
+
+[repl.analysis]
+passes = ["check_checker"]
+check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }

@@ -2,7 +2,11 @@
 ;; One contract for the whole collection; each minted card stores its own
 ;; token URI pointing to OpenSea-style metadata JSON.
 
-(impl-trait 'SP3D6PV2ACBPEKYJTCMH7HEN02KP87QSP8KTEH335.sip-009-trait.sip-009-trait)
+;; SIP-009 NFT trait. Use the testnet address when deploying to testnet,
+;; and the mainnet address when deploying to mainnet. Swap before deploy.
+;; Testnet: 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.nft-trait.nft-trait
+;; Mainnet: 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.nft-trait
+(impl-trait 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.nft-trait.nft-trait)
 
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant ERR-OWNER-ONLY (err u100))
