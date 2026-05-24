@@ -27,6 +27,11 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
   const [supply, setSupply] = useState(500);
   const [stats, setStats] = useState<CardStats>(() => generateStats('common'));
   const [imageUrl, setImageUrl] = useState('');
+  const [originalImageUrl, setOriginalImageUrl] = useState('');
+  const [transformedImageUrl, setTransformedImageUrl] = useState('');
+  const [transformState, setTransformState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [transformError, setTransformError] = useState<string | null>(null);
+  const [pickedVariant, setPickedVariant] = useState<'original' | 'transformed'>('original');
   const [dragOver, setDragOver] = useState(false);
   const [pinataJwt, setPinataJwt] = useState(() => localStorage.getItem('cf_pinata') || '');
   const [pinataStatus, setPinataStatus] = useState<'idle' | 'ok' | 'err'>('idle');
