@@ -80,10 +80,40 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     if (pinataJwt) localStorage.setItem('cf_pinata', pinataJwt);
   }, [pinataJwt]);
 
+  const runTransform = async (src: string) => {
+    setTransformState('loading');
+    setTransformError(null);
+    setTransformedImageUrl('');
+    try {
+      const { data, error } = await supabase.functions.invoke('transform-character-image', {
+        body: { imageUrl: src },
+      });
+      if (error) throw new Error(error.message);
+      if (!data?.imageUrl) throw new Error('No image returned');
+      setTransformedImageUrl(data.imageUrl);
+      setTransformState('done');
+    } catch (e: unknown) {
+      setTransformError(e instanceof Error ? e.message : 'Transform failed');
+      setTransformState('error');
+    }
+  };
+
   const handleImage = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => setImageUrl(e.target?.result as string);
+    reader.onload = (e) => {
+      const src = e.target?.result as string;
+      setOriginalImageUrl(src);
+      setImageUrl(src);
+      setPickedVariant('original');
+      setTransformedImageUrl('');
+      runTransform(src);
+    };
     reader.readAsDataURL(file);
+  };
+
+  const pickVariant = (v: 'original' | 'transformed') => {
+    setPickedVariant(v);
+    setImageUrl(v === 'original' ? originalImageUrl : transformedImageUrl);
   };
 
   const rerollStats = () => setStats(generateStats(rarity));
