@@ -59,6 +59,10 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     setRarity('common');
     setStats(generateStats('common'));
     setImageUrl('');
+    setOriginalImageUrl('');
+    setTransformedImageUrl('');
+    setTransformState('idle');
+    setPickedVariant('original');
     setSupply(500);
   };
 
