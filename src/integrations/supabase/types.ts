@@ -106,6 +106,7 @@ export type Database = {
       }
       nft_cards: {
         Row: {
+          chain_status: string
           created_at: string
           description: string
           element: string
@@ -113,14 +114,17 @@ export type Database = {
           image_url: string
           metadata_url: string
           name: string
+          on_chain_token_id: number | null
           owner_id: string
           pack_id: string | null
           rarity: Database["public"]["Enums"]["card_rarity"]
           serial: number
           stats: Json
           template_id: string
+          tx_id: string | null
         }
         Insert: {
+          chain_status?: string
           created_at?: string
           description?: string
           element: string
@@ -128,14 +132,17 @@ export type Database = {
           image_url: string
           metadata_url?: string
           name: string
+          on_chain_token_id?: number | null
           owner_id: string
           pack_id?: string | null
           rarity: Database["public"]["Enums"]["card_rarity"]
           serial: number
           stats: Json
           template_id: string
+          tx_id?: string | null
         }
         Update: {
+          chain_status?: string
           created_at?: string
           description?: string
           element?: string
@@ -143,12 +150,14 @@ export type Database = {
           image_url?: string
           metadata_url?: string
           name?: string
+          on_chain_token_id?: number | null
           owner_id?: string
           pack_id?: string | null
           rarity?: Database["public"]["Enums"]["card_rarity"]
           serial?: number
           stats?: Json
           template_id?: string
+          tx_id?: string | null
         }
         Relationships: [
           {

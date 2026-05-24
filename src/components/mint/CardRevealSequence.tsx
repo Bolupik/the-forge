@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { NFTCard, Rarity } from '@/lib/cardforge';
 import { playCardFlip, playRareReveal, playSuccess, playClick } from '@/lib/sounds';
 import NFTCardComponent from '@/components/NFTCard';
+import { useStacksAuth } from '@/contexts/StacksAuthContext';
+import { mintCardOnChain, getContractConfig, explorerTxUrl } from '@/lib/stacksMint';
 
 interface CardRevealSequenceProps {
   cards: NFTCard[];
@@ -26,6 +28,39 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
   const [showcaseIdx, setShowcaseIdx] = useState<number | null>(null);
   const [shake, setShake] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const { userData } = useStacksAuth();
+  const contractCfg = getContractConfig();
+  const [mintState, setMintState] = useState<'idle' | 'minting' | 'done' | 'error'>('idle');
+  const [mintProgress, setMintProgress] = useState(0);
+  const [mintError, setMintError] = useState<string | null>(null);
+  const [txids, setTxids] = useState<string[]>([]);
+
+  const handleMintToWallet = async () => {
+    if (!userData?.address || !contractCfg) return;
+    setMintState('minting');
+    setMintError(null);
+    setMintProgress(0);
+    const ids: string[] = [];
+    try {
+      for (let i = 0; i < cards.length; i++) {
+        const { txid } = await mintCardOnChain({ card: cards[i], recipient: userData.address });
+        ids.push(txid);
+        setTxids([...ids]);
+        setMintProgress(i + 1);
+      }
+      setMintState('done');
+      playSuccess();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Mint failed';
+      // user cancelled wallet popup → silent reset
+      if (/cancel|reject|denied/i.test(msg)) {
+        setMintState('idle');
+        return;
+      }
+      setMintError(msg);
+      setMintState('error');
+    }
+  };
 
   // Auto-reveal sequence
   useEffect(() => {
@@ -208,32 +243,81 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
         )}
 
         {showSummary && (
-          <>
-            <button
-              type="button"
-              onClick={() => { playClick(); onMintAgain(); }}
-              className="font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95"
-              style={{
-                background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b)',
-                color: 'var(--cf-bg)',
-                boxShadow: '0 4px 30px rgba(200,168,75,0.35)',
-              }}
-            >
-              ⚡ Open Another Pack
-            </button>
-            <button
-              type="button"
-              onClick={() => { playClick(); onDone(); }}
-              className="font-ui text-[0.6rem] uppercase tracking-[0.3em] px-5 py-3 rounded-xl transition-all hover:-translate-y-0.5"
-              style={{
-                border: '1px solid rgba(200,168,75,0.25)',
-                color: 'var(--cf-gold)',
-                background: 'rgba(200,168,75,0.05)',
-              }}
-            >
-              View Collection
-            </button>
-          </>
+          <div className="flex flex-col items-center gap-3 w-full max-w-md">
+            {contractCfg && userData?.address && mintState !== 'done' && (
+              <button
+                type="button"
+                onClick={handleMintToWallet}
+                disabled={mintState === 'minting'}
+                className="w-full font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-wait"
+                style={{
+                  background: 'linear-gradient(135deg, #5b8def, #8b5cf6, #ec4899)',
+                  color: '#fff',
+                  boxShadow: '0 4px 30px rgba(91,141,239,0.35)',
+                }}
+              >
+                {mintState === 'minting'
+                  ? `Signing ${mintProgress}/${cards.length}…`
+                  : `🪪 Mint ${cards.length} to my Stacks wallet`}
+              </button>
+            )}
+
+            {mintState === 'done' && contractCfg && (
+              <div className="w-full p-3 rounded-lg text-center" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)' }}>
+                <p className="font-ui text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: '#4ade80' }}>
+                  ✓ All {cards.length} mint txs submitted
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center mt-2">
+                  {txids.map((t, i) => (
+                    <a key={t} href={explorerTxUrl(t, contractCfg.network)} target="_blank" rel="noreferrer"
+                       className="font-mono text-[0.55rem] underline" style={{ color: 'var(--cf-gold)' }}>
+                      tx{i + 1}↗
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {mintError && (
+              <div className="w-full p-2 rounded text-center font-body text-[0.65rem]"
+                   style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171' }}>
+                {mintError}
+              </div>
+            )}
+
+            {!contractCfg && (
+              <p className="font-body text-[0.6rem] text-center" style={{ color: 'var(--cf-muted)' }}>
+                Set <code>VITE_STACKS_CONTRACT_ADDRESS</code> in env to enable on-chain mint.
+              </p>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <button
+                type="button"
+                onClick={() => { playClick(); onMintAgain(); }}
+                className="font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95"
+                style={{
+                  background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b)',
+                  color: 'var(--cf-bg)',
+                  boxShadow: '0 4px 30px rgba(200,168,75,0.35)',
+                }}
+              >
+                ⚡ Open Another Pack
+              </button>
+              <button
+                type="button"
+                onClick={() => { playClick(); onDone(); }}
+                className="font-ui text-[0.6rem] uppercase tracking-[0.3em] px-5 py-3 rounded-xl transition-all hover:-translate-y-0.5"
+                style={{
+                  border: '1px solid rgba(200,168,75,0.25)',
+                  color: 'var(--cf-gold)',
+                  background: 'rgba(200,168,75,0.05)',
+                }}
+              >
+                View Collection
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

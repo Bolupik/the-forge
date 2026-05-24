@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { CardTemplate, Rarity, generateStats, CardStats, ELEMENTS, getTemplates, saveTemplates, getCollectionConfig, saveCollectionConfig } from '@/lib/cardforge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ForgePageProps {
   onDataChange: () => void;
@@ -26,6 +27,11 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
   const [supply, setSupply] = useState(500);
   const [stats, setStats] = useState<CardStats>(() => generateStats('common'));
   const [imageUrl, setImageUrl] = useState('');
+  const [originalImageUrl, setOriginalImageUrl] = useState('');
+  const [transformedImageUrl, setTransformedImageUrl] = useState('');
+  const [transformState, setTransformState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [transformError, setTransformError] = useState<string | null>(null);
+  const [pickedVariant, setPickedVariant] = useState<'original' | 'transformed'>('original');
   const [dragOver, setDragOver] = useState(false);
   const [pinataJwt, setPinataJwt] = useState(() => localStorage.getItem('cf_pinata') || '');
   const [pinataStatus, setPinataStatus] = useState<'idle' | 'ok' | 'err'>('idle');
@@ -53,6 +59,10 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     setRarity('common');
     setStats(generateStats('common'));
     setImageUrl('');
+    setOriginalImageUrl('');
+    setTransformedImageUrl('');
+    setTransformState('idle');
+    setPickedVariant('original');
     setSupply(500);
   };
 
@@ -74,10 +84,40 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     if (pinataJwt) localStorage.setItem('cf_pinata', pinataJwt);
   }, [pinataJwt]);
 
+  const runTransform = async (src: string) => {
+    setTransformState('loading');
+    setTransformError(null);
+    setTransformedImageUrl('');
+    try {
+      const { data, error } = await supabase.functions.invoke('transform-character-image', {
+        body: { imageUrl: src },
+      });
+      if (error) throw new Error(error.message);
+      if (!data?.imageUrl) throw new Error('No image returned');
+      setTransformedImageUrl(data.imageUrl);
+      setTransformState('done');
+    } catch (e: unknown) {
+      setTransformError(e instanceof Error ? e.message : 'Transform failed');
+      setTransformState('error');
+    }
+  };
+
   const handleImage = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => setImageUrl(e.target?.result as string);
+    reader.onload = (e) => {
+      const src = e.target?.result as string;
+      setOriginalImageUrl(src);
+      setImageUrl(src);
+      setPickedVariant('original');
+      setTransformedImageUrl('');
+      runTransform(src);
+    };
     reader.readAsDataURL(file);
+  };
+
+  const pickVariant = (v: 'original' | 'transformed') => {
+    setPickedVariant(v);
+    setImageUrl(v === 'original' ? originalImageUrl : transformedImageUrl);
   };
 
   const rerollStats = () => setStats(generateStats(rarity));
@@ -175,6 +215,10 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     setName('');
     setDescription('');
     setImageUrl('');
+    setOriginalImageUrl('');
+    setTransformedImageUrl('');
+    setTransformState('idle');
+    setPickedVariant('original');
     setRarity('common');
     setSupply(500);
     setStats(generateStats('common'));
@@ -247,6 +291,68 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
             </div>
           )}
         </div>
+
+        {/* Fighting-Pokémon variant picker */}
+        {originalImageUrl && (
+          <div className="mb-5">
+            <SectionLabel text="Choose Variant" />
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'original' as const, label: 'Original', src: originalImageUrl },
+                { key: 'transformed' as const, label: 'Fighting ⚔', src: transformedImageUrl },
+              ].map((opt) => {
+                const active = pickedVariant === opt.key;
+                const isLoading = opt.key === 'transformed' && transformState === 'loading';
+                const isError = opt.key === 'transformed' && transformState === 'error';
+                const disabled = opt.key === 'transformed' && !transformedImageUrl;
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => !disabled && pickVariant(opt.key)}
+                    disabled={disabled}
+                    className="relative flex flex-col items-center gap-1 p-2 rounded-lg transition-all duration-200 disabled:cursor-not-allowed"
+                    style={{
+                      border: `1.5px solid ${active ? 'var(--cf-gold)' : 'var(--cf-border2)'}`,
+                      background: active ? 'rgba(200,168,75,0.08)' : 'transparent',
+                      boxShadow: active ? '0 0 12px rgba(200,168,75,0.2)' : 'none',
+                      opacity: disabled ? 0.5 : 1,
+                    }}
+                  >
+                    <div className="w-full aspect-square rounded overflow-hidden flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                      {opt.src ? (
+                        <img src={opt.src} alt={opt.label} className="w-full h-full object-cover" />
+                      ) : isLoading ? (
+                        <span className="font-ui text-[0.55rem] animate-pulse" style={{ color: 'var(--cf-gold)' }}>Generating…</span>
+                      ) : isError ? (
+                        <span className="font-ui text-[0.55rem]" style={{ color: '#f87171' }}>Failed</span>
+                      ) : (
+                        <span className="font-ui text-[0.55rem]" style={{ color: 'var(--cf-muted)' }}>—</span>
+                      )}
+                    </div>
+                    <span className="font-ui text-[0.55rem] uppercase tracking-wider" style={{ color: active ? 'var(--cf-gold)' : 'var(--cf-muted2)' }}>
+                      {opt.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {transformState === 'done' && (
+              <button
+                type="button"
+                onClick={() => runTransform(originalImageUrl)}
+                className="w-full mt-2 py-1.5 font-ui text-[0.55rem] uppercase tracking-wider rounded transition-colors"
+                style={{ border: '1px solid var(--cf-border2)', color: 'var(--cf-muted2)' }}
+              >
+                ↻ Regenerate fighting variant
+              </button>
+            )}
+            {transformError && (
+              <p className="font-body text-[0.55rem] mt-2 text-center" style={{ color: '#f87171' }}>{transformError}</p>
+            )}
+          </div>
+        )}
+
 
         {/* Card Identity */}
         <SectionLabel text="Card Identity" />

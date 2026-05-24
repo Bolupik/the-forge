@@ -12,6 +12,8 @@ const Account = () => {
   const [cardCount, setCardCount] = useState<number | null>(null);
   const [rarityCounts, setRarityCounts] = useState<Record<string, number>>({});
   const [tradeCount, setTradeCount] = useState(0);
+  const [onChainCount, setOnChainCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +33,7 @@ const Account = () => {
         }
 
         const [{ data: cards }, { count: trades }] = await Promise.all([
-          supabase.from('nft_cards').select('rarity').eq('owner_id', userId),
+          supabase.from('nft_cards').select('rarity, chain_status').eq('owner_id', userId),
           supabase
             .from('trades')
             .select('*', { count: 'exact', head: true })
@@ -41,13 +43,19 @@ const Account = () => {
 
         if (cancelled) return;
 
-        const rows = (cards as { rarity: string }[] | null) ?? [];
+        const rows = (cards as { rarity: string; chain_status: string | null }[] | null) ?? [];
         setCardCount(rows.length);
         const buckets: Record<string, number> = {};
+        let onchain = 0;
+        let pending = 0;
         for (const r of rows) {
           buckets[r.rarity] = (buckets[r.rarity] ?? 0) + 1;
+          if (r.chain_status === 'confirmed') onchain++;
+          else if (r.chain_status === 'pending') pending++;
         }
         setRarityCounts(buckets);
+        setOnChainCount(onchain);
+        setPendingCount(pending);
         setTradeCount(trades ?? 0);
       } finally {
         if (!cancelled) setLoading(false);
