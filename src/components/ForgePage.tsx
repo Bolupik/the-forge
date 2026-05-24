@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { CardTemplate, Rarity, generateStats, CardStats, ELEMENTS, getTemplates, saveTemplates, getCollectionConfig, saveCollectionConfig } from '@/lib/cardforge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ForgePageProps {
   onDataChange: () => void;
