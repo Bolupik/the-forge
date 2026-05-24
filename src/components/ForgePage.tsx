@@ -215,6 +215,10 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     setName('');
     setDescription('');
     setImageUrl('');
+    setOriginalImageUrl('');
+    setTransformedImageUrl('');
+    setTransformState('idle');
+    setPickedVariant('original');
     setRarity('common');
     setSupply(500);
     setStats(generateStats('common'));
