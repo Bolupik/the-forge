@@ -1,13 +1,1 @@
-project_id = "pibudjzbhbfngmeaquug"
-
-[functions.open-pack]
-verify_jwt = false
-
-[functions.seed-packs]
-verify_jwt = false
-
-[functions.store-card-metadata]
-verify_jwt = false
-
-[functions.transform-character-image]
-verify_jwt = false
+project_id = "ubecywpizzpwskgqxwus"
