@@ -12,6 +12,8 @@ const Account = () => {
   const [cardCount, setCardCount] = useState<number | null>(null);
   const [rarityCounts, setRarityCounts] = useState<Record<string, number>>({});
   const [tradeCount, setTradeCount] = useState(0);
+  const [onChainCount, setOnChainCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
