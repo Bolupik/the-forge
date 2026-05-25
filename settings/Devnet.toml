@@ -1,0 +1,7 @@
+[network]
+name = "devnet"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "fragile loan twenty basic net assault symptom pull toy copy cannon either indicate oppose lawn gadget battle august churn serve brisk disorder seed fear"
+balance = 100_000_000_000_000
