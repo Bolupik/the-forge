@@ -1,27 +1,82 @@
-# Deploying `cardforge-nft` via Hiro Platform
+# Deploying `cardforge-nft` safely on devnet, testnet, and mainnet
 
-## What I just fixed
+## What was causing the failures
 
-1. **`Clarinet.toml`** — simplified to the minimal valid schema (`epoch` as string `"2.4"`, removed the `[repl.analysis]` block that Hiro Platform's validator rejects). This clears the *"Error updating devnet deployment plan"* and *"Error generating Devnet config"* errors.
+1. **Devnet config was incomplete**
+   - `settings/Devnet.toml` was missing, which can break local devnet plan generation.
 
-2. **`contracts/cardforge-nft.clar`** — the SIP-009 `nft-trait` is now **defined inline inside the contract** instead of being imported from an external trait contract. The previous `(impl-trait 'ST1NXBK3...nft-trait.nft-trait)` reference was failing because:
-   - On **devnet**, that trait contract doesn't exist → devnet-plan generation fails.
-   - On **testnet** via Xverse, the node couldn't resolve it → "unable to parse node response".
+2. **Hiro/Xverse was misreading top-level trait code during deployment**
+   - The earlier contract version used top-level trait declarations/imports.
+   - Hiro Platform surfaced that as **"Asset Transfers Detected"** even though this is an NFT contract deploy.
+   - Xverse/Hiro then failed with generic publish errors like:
+     - `Request failed with status code 400`
+     - `Something went wrong. 'undefined' was not deployed to mainnet.`
 
-   Defining the trait inline keeps the contract SIP-009 compliant (same function signatures, same NFT semantics) and makes it deployable to any network with zero external dependencies.
+3. **Network mismatch can produce misleading wallet errors**
+   - Your screenshots show Xverse on **Testnet4** while Hiro reported a deploy failure mentioning **mainnet**.
+   - That usually means the selected deploy target and the wallet network were out of sync.
 
-## Deploy steps
+## What is fixed now
 
-1. Push these files to the GitHub repo Hiro Platform is watching.
-2. In Hiro Platform → your project → **Contracts**, refresh — the red errors should be gone and `cardforge-nft` should show as deployable.
-3. Click `cardforge-nft` → **Deploy** → **Testnet**.
-4. Approve the transaction in Xverse.
-5. Once confirmed, copy the `<deployer-address>.cardforge-nft` identifier and set:
+1. **`contracts/cardforge-nft.clar`**
+   - Removed deploy-risky top-level trait declarations/imports.
+   - Removed the admin-only `set-token-uri` function to keep publish flow minimal.
+   - The contract now contains only the NFT definition, read-only getters, transfer, and mint logic.
+
+2. **`Clarinet.toml`**
+   - Kept the manifest minimal and Hiro-friendly.
+   - Added a basic `[repl]` section for more stable local tooling behavior.
+
+3. **`settings/Devnet.toml`**
+   - Added the missing devnet network config so local plan generation has all three network configs present.
+
+## Deployment checklist by network
+
+### Devnet
+
+Use this only for local Clarinet-style testing.
+
+1. Keep `settings/Devnet.toml` in the repo.
+2. Use the existing `deployments/default.devnet-plan.yaml`.
+3. If you regenerate plans locally later, make sure devnet settings remain present.
+
+### Testnet
+
+1. Push the latest contract files to the repo Hiro Platform watches.
+2. In Hiro Platform, refresh the project before deploying.
+3. Select **Testnet** in Hiro Platform.
+4. In Xverse, switch Stacks network to **Testnet4**.
+5. Approve the deployment.
+6. After confirmation, set:
    - `VITE_STACKS_CONTRACT_ADDRESS=<deployer-address>`
    - `VITE_STACKS_CONTRACT_NAME=cardforge-nft`
    - `VITE_STACKS_NETWORK=testnet`
 
-## Notes
+### Mainnet
 
-- The contract is fully SIP-009 compatible — wallets and explorers will recognize the inline trait by structural match.
-- For mainnet, no contract change is needed; just redeploy from Hiro Platform with the Mainnet network selected and update `VITE_STACKS_NETWORK=mainnet`.
+1. In Hiro Platform, explicitly choose **Mainnet**.
+2. In Xverse, switch off Testnet and use your **mainnet** account.
+3. Deploy the exact same contract code.
+4. After confirmation, update:
+   - `VITE_STACKS_CONTRACT_ADDRESS=<mainnet-deployer-address>`
+   - `VITE_STACKS_CONTRACT_NAME=cardforge-nft`
+   - `VITE_STACKS_NETWORK=mainnet`
+
+## Rules that prevent future deploy errors
+
+- **Do not re-add** top-level `define-trait`, `impl-trait`, or external trait imports to this deployable contract unless you have verified Hiro/Xverse handles them correctly.
+- **Do not deploy testnet with a mainnet wallet** or mainnet with a testnet wallet.
+- **Always refresh Hiro Platform after pushing contract changes** so it is not deploying cached code.
+- If Hiro still shows **Asset Transfers Detected** for this contract, it is almost certainly using stale code — refresh or reconnect the repo state before signing anything.
+
+## Quick interpretation of the errors you saw
+
+- **`Asset Transfers Detected`**
+  - Caused by Hiro/Xverse misclassifying the old contract code during publish analysis.
+
+- **`Request failed with status code 400`**
+  - Usually bad publish payload, stale contract analysis, or network mismatch.
+
+- **`'undefined' was not deployed to mainnet`**
+  - Usually a follow-on Hiro/Xverse UI error after the publish request already failed.
+  - It does **not** mean your contract name is literally `undefined` in source.
