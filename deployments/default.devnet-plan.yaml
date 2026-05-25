@@ -11,7 +11,6 @@ plan:
         - contract-publish:
             contract-name: cardforge-nft
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 20990
             path: contracts/cardforge-nft.clar
             anchor-block-only: true
             clarity-version: 2
