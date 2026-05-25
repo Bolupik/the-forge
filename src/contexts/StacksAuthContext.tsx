@@ -43,7 +43,10 @@ const hexToUtf8 = (hex: string): string => {
 
 const extractAddress = (parsed: any): string | undefined => {
   if (!parsed || typeof parsed !== "object") return undefined;
+  // Testnet-first: app is locked to Stacks testnet for now.
   return (
+    parsed?.addresses?.testnet?.address ||
+    parsed?.userData?.profile?.stxAddress?.testnet ||
     parsed?.addresses?.stx?.[0]?.address ||
     parsed?.addresses?.mainnet?.address ||
     parsed?.userData?.profile?.stxAddress?.mainnet ||

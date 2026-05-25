@@ -14,7 +14,8 @@ export interface ContractConfig {
 export const getContractConfig = (): ContractConfig | null => {
   const address = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS as string | undefined;
   const name = (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft';
-  const network = ((import.meta.env.VITE_STACKS_NETWORK as string | undefined) || 'testnet') as StacksNetwork;
+  // Hard-locked to testnet for now. Ignore VITE_STACKS_NETWORK until mainnet launch.
+  const network: StacksNetwork = 'testnet';
   if (!address) return null;
   return { address, name, network };
 };
