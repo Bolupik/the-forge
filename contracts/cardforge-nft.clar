@@ -1,21 +1,11 @@
-;; CardForge NFT — SIP-009 compliant
-;; Self-contained: defines and implements the SIP-009 nft-trait inline so it
-;; works on devnet/testnet/mainnet without needing an external trait contract
-;; to be deployed first.
+;; CardForge NFT — deploy-safe across devnet, testnet, and mainnet.
+;;
+;; Important: this contract intentionally avoids top-level trait declarations
+;; and trait imports because Hiro/Xverse can misclassify them during contract
+;; deployment, which caused false "Asset Transfers Detected" warnings and
+;; 400/"undefined was not deployed" publish failures.
 
-(define-trait nft-trait
-  (
-    (get-last-token-id () (response uint uint))
-    (get-token-uri (uint) (response (optional (string-ascii 256)) uint))
-    (get-owner (uint) (response (optional principal) uint))
-    (transfer (uint principal principal) (response bool uint))
-  )
-)
-
-(define-constant CONTRACT-OWNER tx-sender)
-(define-constant ERR-OWNER-ONLY (err u100))
 (define-constant ERR-NOT-TOKEN-OWNER (err u101))
-(define-constant ERR-NOT-FOUND (err u102))
 
 (define-non-fungible-token cardforge-nft uint)
 
@@ -51,9 +41,3 @@
     (print { event: "mint", id: next-id, recipient: recipient, uri: token-uri })
     (ok next-id)))
 
-(define-public (set-token-uri (token-id uint) (token-uri (string-ascii 256)))
-  (begin
-    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-OWNER-ONLY)
-    (asserts! (is-some (nft-get-owner? cardforge-nft token-id)) ERR-NOT-FOUND)
-    (map-set token-uris token-id token-uri)
-    (ok true)))
