@@ -1,70 +1,87 @@
+# CardForge Signature Card System
 
-# Stacks NFT + Image Transform Plan
+A complete redesign of the card object itself — frame, art treatment, rarity language, motion, and data layout — fused into one cohesive artifact that doesn't look like any other NFT card on the market.
 
-Two parallel tracks. Both shippable in this loop.
+## The concept: "Forged Relic"
 
-## Track A — SIP-009 NFT Contract (testnet now, mainnet later)
+Each card is presented as a **mined, etched, holographic shard** — part archaeological artifact, part futuristic data instrument. Four visual systems layered together:
 
-### 1. Clarity contract — `contracts/cardforge-nft.clar`
-Standard SIP-009 with full per-token metadata baked into the token URI:
+1. **Liquid-chrome outer bezel** — sculpted metal frame whose material changes per rarity
+2. **Etched sigil corners** — runic glyphs at all four corners, animated subtly
+3. **Holographic inlay** — the art window has a refractive holo layer that tracks cursor
+4. **Brutalist data strip** — bottom band with mono-spaced serial, stats ticker, rarity sigil
 
-- `define-non-fungible-token cardforge-nft uint`
-- `get-last-token-id`, `get-token-uri`, `get-owner`, `transfer` (SIP-009 trait)
-- `mint (recipient principal) (token-uri (string-ascii 256))` — public, anyone can call, pays mint fee in STX (0 for now)
-- Per-token URI stored in `(define-map token-uris uint (string-ascii 256))` so each card points to its own IPFS metadata JSON
-- Optional `set-token-uri` admin function gated by `contract-owner`
-- Clarinet project scaffold + one happy-path test
+No purple gradients. No generic "trading card" frames. Every card looks like a museum-grade collectible that happens to live on-chain.
 
-Deploy guide (`contracts/DEPLOY.md`) with steps for Hiro Platform deploy on testnet, then mainnet.
+## Rarity language (multi-channel)
 
-### 2. Metadata pinning — edge function `pin-card-metadata`
-- Triggered when admin uploads a card image OR when a card is minted
-- Builds OpenSea-style JSON: `{ name, description, image, attributes: [{trait_type, value} for rarity/element/ATK/DEF/SPD/SPC/HP], properties: { rarity, element, stats, serial } }`
-- Pins JSON + image to web3.storage via REST API using `WEB3_STORAGE_TOKEN` secret
-- Returns `ipfs://<cid>` URI
-- Stores resulting URI on `card_templates.metadata_url` (template-level) and per-mint `nft_cards.metadata_url`
+Rarity is communicated through **three reinforcing signals** so it reads at any zoom:
 
-### 3. Wallet contract-call wiring — `src/lib/stacksMint.ts`
-- New hook `useContractMint()` using `@stacks/connect` `openContractCall`
-- After `open-pack` returns 5 cards, UI iterates and prompts wallet to sign 5 `mint` transactions (one per card), each with that card's IPFS URI
-- New columns on `nft_cards`: `tx_id text`, `on_chain_token_id integer`, `chain_status text` (pending/confirmed/failed)
-- Tx status polled via Hiro API; `chain_status` updated when confirmed
-- Account page shows on-chain badge + Explorer link per card
+| Rarity     | Frame material        | Aura FX                  | Sigil glyph        |
+|------------|-----------------------|--------------------------|--------------------|
+| Common     | Brushed graphite      | None                     | Single dot         |
+| Rare       | Brushed cobalt steel  | Soft cyan edge glow      | Triangle           |
+| Epic       | Molten copper-gold    | Pulsing ember particles  | Hexagon            |
+| Legendary  | Black opal + aurora   | Drifting aurora + ticker | Eye-of-forge mark  |
 
-### 4. Config
-- New secrets: `WEB3_STORAGE_TOKEN`, `STACKS_CONTRACT_ADDRESS`, `STACKS_CONTRACT_NAME`, `STACKS_NETWORK` (testnet/mainnet)
-- Stored client-side via `VITE_` exposure for the contract address (publishable)
+Legendary cards also get a **slightly taller silhouette** (asymmetric notched top corner) so they stand out instantly in a grid.
 
-## Track B — Fighting-Pokemon Image Transform
+## Motion / interactivity
 
-### 1. Edge function `transform-character-image`
-- Input: image URL or base64
-- Calls Lovable AI Gateway with `google/gemini-2.5-flash-image` (Nano Banana edit mode)
-- Prompt: "Reimagine this exact character in a dynamic fighting stance, Pokémon trading-card-game art style — bold cel-shaded lines, dramatic lighting, action pose, battle-ready. Preserve the character's face, hair, outfit, and identifying features exactly. Transparent or clean background."
-- Returns base64 PNG
+- **Idle (in a grid)**: very subtle rune breathing, scan-line drift on legendaries only — keeps gallery calm.
+- **Hover**: card lifts, holo-shimmer activates and tracks cursor, scan-lines accelerate, edge glow brightens, ambient sound tick.
+- **Tilt (on detail view)**: full gyro/mouse parallax — frame, art, holo, and data strip live on separate Z-layers.
+- **Reveal (during mint)**: frame assembles in sequence — bezel materializes, sigils etch in, art window unfolds, data strip prints type-writer style, then rarity FX bloom.
 
-### 2. ForgePage upload UX
-- After admin uploads a character image, automatically call the transform function
-- Show a two-up picker: **Original** | **Fighting Pokémon** with radio selection
-- Selected version is what gets pinned to IPFS and saved on the template
-- "Regenerate" button to re-roll the transform
+## Card anatomy (top → bottom)
 
-## Out of scope (won't do this loop)
-- Mainnet deploy (you do that, then update secret)
-- On-chain royalties / marketplace integration
-- Reading existing wallet NFTs to seed gallery
+```text
+┌─────────────────────────────────┐
+│ ◈ sigil          element ◈      │  <- top corners: rarity glyphs + element icon
+│  ┌───────────────────────────┐  │
+│  │                           │  │
+│  │      ART WINDOW           │  │  <- holo inlay, refractive layer
+│  │     (character)           │  │
+│  │                           │  │
+│  └───────────────────────────┘  │
+│  NAME · LVL                     │  <- display font, single line
+│  ─────────────────────────────  │
+│  ATK 92  DEF 71  SPD 88  SPC 64 │  <- mono ticker, brutalist
+│  HP ████████████░░  142         │
+│  ─────────────────────────────  │
+│ ◈ #0001 / 10000      RARITY ◈   │  <- bottom corners: serial + rarity word
+└─────────────────────────────────┘
+```
 
-## Technical notes
-- web3.storage is now Storacha and requires a UCAN-signed token. The simpler legacy API token still works through their REST `/upload` endpoint — you'll generate one at https://web3.storage and paste it as `WEB3_STORAGE_TOKEN`. If you'd rather use Pinata, swap one secret and I'll change the upload helper.
-- Mint signing uses `@stacks/connect` v7. Each card = one tx; 5 cards = 5 wallet popups. If that's bad UX, an alternative is a single `mint-many` Clarity function (let me know and I'll add it).
-- Contract is non-custodial and free-to-mint — there's no allowlist or pack-id check on-chain. Pack rules stay enforced by the `open-pack` edge function.
+## Technical implementation
 
-## Files I'll create / change
-- `contracts/cardforge-nft.clar`, `contracts/DEPLOY.md`, Clarinet config + 1 test
-- `supabase/functions/pin-card-metadata/index.ts` (new)
-- `supabase/functions/transform-character-image/index.ts` (new)
-- `src/lib/stacksMint.ts` (new) + small additions to `MintPage.tsx`, `Account.tsx`, `ForgePage.tsx`
-- Migration: add `tx_id`, `on_chain_token_id`, `chain_status` to `nft_cards`
-- Secrets requested: `WEB3_STORAGE_TOKEN`, `STACKS_CONTRACT_ADDRESS`, `STACKS_CONTRACT_NAME`
+### Files to create
+- `src/components/card/ForgeCard.tsx` — the new master card component (replaces inline JSX in `NFTCard.tsx`)
+- `src/components/card/ForgeFrame.tsx` — SVG-based outer bezel with rarity-driven material
+- `src/components/card/HoloLayer.tsx` — cursor-tracking holo + scan-line overlay
+- `src/components/card/SigilGlyph.tsx` — animated corner runes (SVG, 4 variants)
+- `src/components/card/DataStrip.tsx` — brutalist stats + serial band
+- `src/components/card/cardTokens.ts` — per-rarity tokens (gradients, glow, particle config)
+- `src/styles/forge-card.css` — keyframes for shimmer, scan, aurora, rune-breathe
 
-Approve to start? I'll request the web3.storage token first, then build both tracks in parallel.
+### Files to update
+- `src/components/NFTCard.tsx` — becomes a thin wrapper around `ForgeCard`
+- `src/components/mint/CardRevealSequence.tsx` — use new staged reveal
+- `src/index.css` — add rarity material gradients as semantic tokens (no raw colors in components)
+- `tailwind.config.ts` — extend with `chrome`, `opal`, `ember`, `cobalt` token families
+
+### Design tokens (added to `index.css`)
+HSL semantic tokens for each rarity material (base, highlight, shadow, glow), plus holo iridescence stops. All animations driven by CSS variables so we can tune intensity without code edits.
+
+### Performance
+- Holo shimmer = single CSS conformal-gradient + `mix-blend-mode: color-dodge`, no JS per-frame.
+- Cursor tracking = one `requestAnimationFrame` loop on the hovered card only.
+- Legendary aurora = CSS-only conic gradient rotation.
+- Grid view auto-disables tilt/holo tracking and uses static rarity glow to stay 60fps with 100+ cards.
+
+## What I will NOT touch in this pass
+- Mint flow logic, Stacks contract, IPFS metadata, templates schema, trading system — purely the visual presentation layer.
+- The AI-generated card art itself — the new frame **enhances** it, doesn't replace it.
+
+## Deliverable
+After implementation you'll see the new card system everywhere cards currently render: Gallery, Mint reveal, Trading listings, Account, and the derivative Forge result panel.
