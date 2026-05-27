@@ -105,7 +105,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
       >
         {/* ============ SVG BEZEL ============ */}
         <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
+          className="forge-bezel-svg absolute inset-0 w-full h-full pointer-events-none"
           viewBox="0 0 285 410"
           preserveAspectRatio="none"
           aria-hidden
