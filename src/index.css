@@ -66,14 +66,28 @@
     background-color: var(--cf-bg);
     color: var(--cf-text);
     background-image:
-      linear-gradient(rgba(200,168,75,0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(200,168,75,0.018) 1px, transparent 1px),
-      radial-gradient(ellipse 600px 400px at 15% 10%, rgba(200,168,75,0.04), transparent),
-      radial-gradient(ellipse 500px 500px at 85% 90%, rgba(120,60,200,0.05), transparent);
-    background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%;
+      linear-gradient(rgba(255,106,42,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,106,42,0.022) 1px, transparent 1px),
+      radial-gradient(ellipse 600px 400px at 15% 10%, rgba(255,106,42,0.05), transparent),
+      radial-gradient(ellipse 500px 500px at 85% 90%, rgba(255,138,76,0.05), transparent),
+      url('/src/assets/smoke-banner.jpg');
+    background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%, cover;
+    background-position: 0 0, 0 0, 0 0, 0 0, center top;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+    background-attachment: scroll, scroll, scroll, scroll, fixed;
     min-height: 100vh;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 14, 0.88);
+    pointer-events: none;
+    z-index: -1;
   }
 }
+
 
 /* Font utility classes */
 .font-display { font-family: 'Cinzel Decorative', serif; }
