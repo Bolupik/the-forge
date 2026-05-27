@@ -75,7 +75,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
   return (
     <div
       ref={rootRef}
-      className="forge-card-root group w-[260px] h-[378px] sm:w-[285px] sm:h-[410px] relative"
+      className={`forge-card-root group w-[260px] h-[378px] sm:w-[285px] sm:h-[410px] relative ${assemble ? 'forge-assemble' : ''}`}
       style={{ animationDelay: `${index * 0.06}s` }}
       onMouseMove={onMove}
       onMouseEnter={() => setHovered(true)}
