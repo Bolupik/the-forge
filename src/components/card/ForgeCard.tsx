@@ -12,6 +12,8 @@ interface Props {
   trades?: Trade[];
   /** Disable parallax tilt + holo cursor tracking (use in dense grids) */
   staticMode?: boolean;
+  /** Play the staged "frame assembles" reveal sequence */
+  assemble?: boolean;
 }
 
 const STAT_KEYS = ['ATK', 'DEF', 'SPD', 'SPC'] as const;
