@@ -69,7 +69,6 @@ const MintPage = () => {
 
   const packsRemaining = Math.max(0, stats.totalPacks - stats.openedPacks);
   // Restrictions removed — picking & demo always allowed.
-  const canMint = !minting;
 
   const handleDemoMint = () => {
     if (minting) return;
