@@ -70,7 +70,7 @@
       linear-gradient(90deg, rgba(255,106,42,0.022) 1px, transparent 1px),
       radial-gradient(ellipse 600px 400px at 15% 10%, rgba(255,106,42,0.05), transparent),
       radial-gradient(ellipse 500px 500px at 85% 90%, rgba(255,138,76,0.05), transparent),
-      url('/src/assets/smoke-banner.jpg');
+      url('/smoke-banner.jpg');
     background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%, cover;
     background-position: 0 0, 0 0, 0 0, 0 0, center top;
     background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
