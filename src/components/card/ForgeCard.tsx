@@ -162,7 +162,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
 
           {/* Art window */}
           <div
-            className="relative flex-1 min-h-[145px] rounded-[6px] overflow-hidden"
+            className="forge-stage-art relative flex-1 min-h-[145px] rounded-[6px] overflow-hidden"
             style={{
               background: 'radial-gradient(ellipse at center, #1a1a2e, #0a0a14)',
               border: '1px solid rgba(255,255,255,0.07)',
