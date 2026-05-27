@@ -223,7 +223,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
           </div>
 
           {/* Name strip */}
-          <div className="pt-[10px] pb-[6px] flex items-baseline justify-between gap-2">
+          <div className="forge-stage-data pt-[10px] pb-[6px] flex items-baseline justify-between gap-2">
             <span
               className="font-display text-[0.82rem] truncate"
               style={{ color: 'var(--cf-text)', textShadow: `0 0 8px ${tok.glow}` }}
