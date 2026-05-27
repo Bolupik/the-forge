@@ -67,8 +67,18 @@ const MintPage = () => {
     loadStats();
   }, []);
 
-  const packsRemaining = stats.totalPacks - stats.openedPacks;
-  const canMint = !loading && packsRemaining > 0 && !minting;
+  const packsRemaining = Math.max(0, stats.totalPacks - stats.openedPacks);
+  // Restrictions removed — picking & demo always allowed.
+  const canMint = !minting;
+
+  const handleDemoMint = () => {
+    if (minting) return;
+    setError(null);
+    const cards = generateDemoCards(stats.cardsPerPack || 5);
+    setPickedPackIdx(0);
+    setDrawnCards(cards);
+    setPhase('opening');
+  };
 
   const handlePackSelected = async (idx: number) => {
     if (minting) return;
