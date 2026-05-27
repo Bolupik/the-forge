@@ -83,7 +83,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
     >
       {/* Outer aura / glow */}
       <div
-        className="absolute -inset-3 rounded-[26px] pointer-events-none transition-opacity duration-500"
+        className="forge-stage-bloom absolute -inset-3 rounded-[26px] pointer-events-none transition-opacity duration-500"
         style={{
           background: `radial-gradient(ellipse at center, ${tok.glow}, transparent 70%)`,
           opacity: hovered ? 1 : 0.55,
@@ -94,7 +94,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
       {/* Legendary aurora ring */}
       {tok.aurora && (
         <div
-          className="forge-aurora absolute -inset-2 rounded-[24px] pointer-events-none"
+          className="forge-aurora forge-stage-bloom absolute -inset-2 rounded-[24px] pointer-events-none"
           style={{ opacity: hovered ? 0.85 : 0.6 }}
         />
       )}
