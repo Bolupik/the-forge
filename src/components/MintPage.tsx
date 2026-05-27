@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { NFTCard } from '@/lib/cardforge';
+import { NFTCard, generateDemoCards } from '@/lib/cardforge';
 import { dbCardToNft, DbNftCard } from '@/lib/dbCards';
 import { supabase } from '@/integrations/supabase/client';
 import PackGrid from './mint/PackGrid';
