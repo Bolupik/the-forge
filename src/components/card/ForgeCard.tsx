@@ -275,7 +275,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
           </div>
 
           {/* Footer */}
-          <div className="flex justify-between items-center pt-[6px]" style={{ borderTop: `1px solid ${tok.accent}22` }}>
+          <div className="forge-stage-footer flex justify-between items-center pt-[6px]" style={{ borderTop: `1px solid ${tok.accent}22` }}>
             <span className="font-mono text-[0.48rem] tracking-wider" style={{ color: 'var(--cf-muted)' }}>
               #{String(card.serial).padStart(4, '0')} · CARDFORGE
             </span>
