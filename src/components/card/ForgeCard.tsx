@@ -18,7 +18,7 @@ interface Props {
 
 const STAT_KEYS = ['ATK', 'DEF', 'SPD', 'SPC'] as const;
 
-const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticMode = false }: Props) => {
+const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticMode = false, assemble = false }: Props) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const [hovered, setHovered] = useState(false);
