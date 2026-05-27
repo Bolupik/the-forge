@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { NFTCard } from '@/lib/cardforge';
+import { NFTCard, generateDemoCards } from '@/lib/cardforge';
 import { dbCardToNft, DbNftCard } from '@/lib/dbCards';
 import { supabase } from '@/integrations/supabase/client';
 import PackGrid from './mint/PackGrid';
@@ -67,8 +67,17 @@ const MintPage = () => {
     loadStats();
   }, []);
 
-  const packsRemaining = stats.totalPacks - stats.openedPacks;
-  const canMint = !loading && packsRemaining > 0 && !minting;
+  const packsRemaining = Math.max(0, stats.totalPacks - stats.openedPacks);
+  // Restrictions removed — picking & demo always allowed.
+
+  const handleDemoMint = () => {
+    if (minting) return;
+    setError(null);
+    const cards = generateDemoCards(stats.cardsPerPack || 5);
+    setPickedPackIdx(0);
+    setDrawnCards(cards);
+    setPhase('opening');
+  };
 
   const handlePackSelected = async (idx: number) => {
     if (minting) return;
@@ -155,39 +164,34 @@ const MintPage = () => {
         </div>
       )}
 
-      {/* Loading */}
-      {loading && (
-        <div className="w-full max-w-[420px] mx-auto mb-6 p-4 rounded-xl text-center"
-             style={{ background: 'var(--cf-surface)', border: '1px solid var(--cf-border)' }}>
-          <p className="font-body text-xs" style={{ color: 'var(--cf-muted2)' }}>
-            Loading collection…
-          </p>
+      {/* Demo mint CTA — bypasses all backend/supply restrictions */}
+      {phase === 'pick' && (
+        <div className="w-full max-w-[420px] mx-auto mb-6 flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={handleDemoMint}
+            disabled={minting}
+            className="w-full font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
+            style={{
+              background: 'linear-gradient(135deg, #c44512, #ff6a2a, #ff8a4c)',
+              color: '#fff',
+              boxShadow: '0 4px 30px rgba(255,106,42,0.35)',
+            }}
+          >
+            ⚡ Demo Mint · Forge {stats.cardsPerPack || 5} Cards
+          </button>
+          <span className="font-ui text-[0.55rem] uppercase tracking-[0.25em]" style={{ color: 'var(--cf-muted2)' }}>
+            Bypasses on-chain · stored locally
+          </span>
         </div>
       )}
 
-      {/* Sold out */}
-      {!loading && packsRemaining <= 0 && (
-        <div
-          className="w-full max-w-[420px] mx-auto mb-6 p-4 rounded-xl text-center animate-card-enter"
-          style={{ background: 'var(--cf-surface)', border: '1px solid var(--cf-border)' }}
-        >
-          <p className="font-display text-sm mb-2" style={{ color: 'var(--cf-gold)' }}>
-            Mint Unavailable
-          </p>
-          <p className="font-body text-xs" style={{ color: 'var(--cf-muted2)' }}>
-            {stats.totalPacks === 0
-              ? 'No packs have been seeded yet. Check back soon.'
-              : 'All packs have been opened!'}
-          </p>
-        </div>
-      )}
-
-      {/* Stage 1: Pack picker */}
-      {canMint && phase === 'pick' && (
+      {/* Stage 1: Pack picker (always available, no supply gating) */}
+      {phase === 'pick' && (
         <PackGrid
           onPackSelected={handlePackSelected}
-          packsRemaining={packsRemaining}
-          totalPacks={stats.totalPacks}
+          packsRemaining={Math.max(packsRemaining, stats.cardsPerPack || 5)}
+          totalPacks={Math.max(stats.totalPacks, 1)}
           disabled={minting}
         />
       )}
