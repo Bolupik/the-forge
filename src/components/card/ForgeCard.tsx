@@ -142,7 +142,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
         <div className="relative w-full h-full p-[14px] flex flex-col" style={{ paddingTop: 14, paddingBottom: 14 }}>
 
           {/* Top sigil row */}
-          <div className="flex justify-between items-center px-[2px] pb-[8px]">
+          <div className="forge-stage-sigils flex justify-between items-center px-[2px] pb-[8px]">
             <div className="flex items-center gap-1.5">
               <SigilGlyph variant={tok.sigil} color={tok.accent} size={13} />
               <span
