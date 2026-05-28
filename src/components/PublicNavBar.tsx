@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppPage } from '@/lib/cardforge';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface PublicNavBarProps {
   activePage: AppPage;
@@ -92,6 +93,8 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
           );
         })}
       </div>
+
+      <ThemeToggle compact className="mr-2 shrink-0" />
 
       {/* Wallet Connect / User Menu */}
       {isAuthenticated && userData ? (
