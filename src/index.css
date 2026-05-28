@@ -4,42 +4,57 @@
 
 @layer base {
   :root {
+    /* === DARK (default) === */
     --background: 240 47% 4%;
-    --foreground: 240 60% 95%;
+    --foreground: 240 10% 95%;
     --card: 240 33% 7%;
-    --card-foreground: 240 60% 95%;
+    --card-foreground: 240 10% 95%;
     --popover: 240 33% 7%;
-    --popover-foreground: 240 60% 95%;
+    --popover-foreground: 240 10% 95%;
     --primary: 18 100% 58%;
     --primary-foreground: 240 47% 4%;
-    --secondary: 240 30% 11%;
-    --secondary-foreground: 240 60% 95%;
-    --muted: 240 18% 35%;
-    --muted-foreground: 240 18% 50%;
+    --secondary: 240 8% 14%;
+    --secondary-foreground: 240 10% 95%;
+    --muted: 240 6% 30%;
+    --muted-foreground: 240 6% 55%;
     --accent: 18 100% 58%;
     --accent-foreground: 240 47% 4%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 30% 16%;
-    --input: 240 30% 16%;
+    --border: 240 8% 16%;
+    --input: 240 8% 16%;
     --ring: 18 100% 58%;
     --radius: 0.5rem;
 
-    /* CardForge custom tokens */
-    --cf-bg: #05050e;
-    --cf-surface: #0d0d1a;
-    --cf-surface2: #131324;
-    --cf-surface3: #1a1a2e;
-    --cf-border: #1e1e35;
+    /* CardForge — smoke + ember palette */
+    --cf-bg: #05050a;
+    --cf-surface: #0e0e14;
+    --cf-surface2: #15151d;
+    --cf-surface3: #1c1c26;
+    --cf-border: #25252e;
     --cf-border2: #3a2418;
-    --cf-text: #eeeef8;
-    --cf-muted: #4a4a6a;
-    --cf-muted2: #6a6a90;
+    --cf-text: #f1f1f4;
+    --cf-muted: #4a4a55;
+    --cf-muted2: #7a7a86;
+
+    /* Ember (orange accent) */
     --cf-gold: #ff6a2a;
     --cf-gold2: #ff8a4c;
     --cf-gold-dark: #c44512;
     --cf-gold-light: #ffd4b0;
 
+    /* Ash (smoky white wordmark gradient) */
+    --cf-ash: #e9e9ec;
+    --cf-ash-soft: #c8c8cf;
+    --cf-ash-mid: #9a9aa4;
+    --cf-ash-dark: #5c5c66;
+    --cf-ash-bright: #ffffff;
+
+    /* Body backdrop */
+    --cf-body-tint-a: rgba(255,106,42,0.022);
+    --cf-body-tint-b: rgba(255,106,42,0.05);
+    --cf-body-tint-c: rgba(255,138,76,0.05);
+    --cf-body-dim: rgba(5, 5, 14, 0.88);
 
     /* Rarity tokens */
     --r-common-border: #8aa0b4;
@@ -55,6 +70,53 @@
     --r-leg-glow: rgba(240,180,20,0.5);
     --r-leg-text: #ffe860;
   }
+
+  /* === LIGHT MODE === */
+  .light {
+    --background: 30 20% 96%;
+    --foreground: 240 15% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 15% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 15% 12%;
+    --primary: 18 95% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 12% 90%;
+    --secondary-foreground: 240 15% 12%;
+    --muted: 30 8% 78%;
+    --muted-foreground: 240 6% 38%;
+    --accent: 18 95% 50%;
+    --accent-foreground: 0 0% 100%;
+    --border: 30 10% 82%;
+    --input: 30 10% 82%;
+    --ring: 18 95% 50%;
+
+    --cf-bg: #f4f1ec;
+    --cf-surface: #ffffff;
+    --cf-surface2: #f7f4ef;
+    --cf-surface3: #ece8e1;
+    --cf-border: #d8d3ca;
+    --cf-border2: #e3a07a;
+    --cf-text: #1a1a22;
+    --cf-muted: #6a6a76;
+    --cf-muted2: #4a4a55;
+
+    --cf-gold: #e35a1c;
+    --cf-gold2: #ff7a36;
+    --cf-gold-dark: #a83a0e;
+    --cf-gold-light: #ffb988;
+
+    --cf-ash: #2a2a32;
+    --cf-ash-soft: #4a4a55;
+    --cf-ash-mid: #6a6a76;
+    --cf-ash-dark: #8a8a96;
+    --cf-ash-bright: #0a0a10;
+
+    --cf-body-tint-a: rgba(227,90,28,0.04);
+    --cf-body-tint-b: rgba(227,90,28,0.07);
+    --cf-body-tint-c: rgba(255,122,54,0.07);
+    --cf-body-dim: rgba(244, 241, 236, 0.82);
+  }
 }
 
 @layer base {
@@ -66,10 +128,10 @@
     background-color: var(--cf-bg);
     color: var(--cf-text);
     background-image:
-      linear-gradient(rgba(255,106,42,0.022) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,106,42,0.022) 1px, transparent 1px),
-      radial-gradient(ellipse 600px 400px at 15% 10%, rgba(255,106,42,0.05), transparent),
-      radial-gradient(ellipse 500px 500px at 85% 90%, rgba(255,138,76,0.05), transparent),
+      linear-gradient(var(--cf-body-tint-a) 1px, transparent 1px),
+      linear-gradient(90deg, var(--cf-body-tint-a) 1px, transparent 1px),
+      radial-gradient(ellipse 600px 400px at 15% 10%, var(--cf-body-tint-b), transparent),
+      radial-gradient(ellipse 500px 500px at 85% 90%, var(--cf-body-tint-c), transparent),
       url('/smoke-banner.jpg');
     background-size: 60px 60px, 60px 60px, 100% 100%, 100% 100%, cover;
     background-position: 0 0, 0 0, 0 0, 0 0, center top;
@@ -82,7 +144,7 @@
     content: '';
     position: fixed;
     inset: 0;
-    background: rgba(5, 5, 14, 0.88);
+    background: var(--cf-body-dim);
     pointer-events: none;
     z-index: -1;
   }
@@ -95,12 +157,21 @@
 .font-body { font-family: 'Exo 2', sans-serif; }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-/* Gold gradient text */
+/* Ash/smoke gradient text — replaces previous gold metallic gradient,
+   matching the SMOKE wordmark in the brand banner. */
 .text-gold-gradient {
-  background: linear-gradient(135deg, #a07830, #f0d878, #c8a84b, #fff5c0, #c8a84b);
+  background: linear-gradient(
+    135deg,
+    var(--cf-ash-dark),
+    var(--cf-ash-bright),
+    var(--cf-ash-soft),
+    var(--cf-ash-bright),
+    var(--cf-ash-mid)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 0 14px rgba(255,106,42,0.35));
 }
 
 /* Shimmer animation */
