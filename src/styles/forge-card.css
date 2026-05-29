@@ -127,7 +127,7 @@
 .forge-ember {
   position: absolute;
   width: 4px; height: 4px; border-radius: 9999px;
-  background: radial-gradient(circle, #ffd47a 0%, rgba(255,140,40,0) 70%);
+  background: radial-gradient(circle, #ffd4b0 0%, rgba(255,106,42,0) 70%);
   animation: forge-ember-rise 2.8s ease-out infinite;
   pointer-events: none;
 }
