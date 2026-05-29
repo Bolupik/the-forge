@@ -12,6 +12,7 @@ import Auth from "./pages/Auth.tsx";
 import Account from "./pages/Account.tsx";
 import Gallery from "./pages/Gallery.tsx";
 import Mint from "./pages/Mint.tsx";
+import DemoMint from "./pages/DemoMint.tsx";
 import Trading from "./pages/Trading.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -61,6 +62,7 @@ const App = () => (
               }
             />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/demo-mint" element={<DemoMint />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
