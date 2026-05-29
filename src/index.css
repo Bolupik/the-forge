@@ -56,19 +56,20 @@
     --cf-body-tint-c: rgba(255,138,76,0.05);
     --cf-body-dim: rgba(5, 5, 14, 0.88);
 
-    /* Rarity tokens */
-    --r-common-border: #8aa0b4;
-    --r-common-glow: rgba(160,190,215,0.3);
-    --r-common-text: #b8cfe0;
-    --r-rare-border: #3a7cd5;
-    --r-rare-glow: rgba(60,140,255,0.4);
-    --r-rare-text: #88c4ff;
-    --r-epic-border: #8b3dc0;
-    --r-epic-glow: rgba(160,60,240,0.4);
-    --r-epic-text: #d870ff;
-    --r-leg-border: #d89010;
-    --r-leg-glow: rgba(240,180,20,0.5);
-    --r-leg-text: #ffe860;
+    /* Rarity tokens — ember & ash only (no gold) */
+    --r-common-border: #8a8a96;
+    --r-common-glow: rgba(200,200,210,0.3);
+    --r-common-text: #c8c8cf;
+    --r-rare-border: #ff8a4c;
+    --r-rare-glow: rgba(255,138,76,0.35);
+    --r-rare-text: #ffb088;
+    --r-epic-border: #ff6a2a;
+    --r-epic-glow: rgba(255,106,42,0.5);
+    --r-epic-text: #ffb088;
+    --r-leg-border: #ffffff;
+    --r-leg-glow: rgba(255,106,42,0.65);
+    --r-leg-text: #ffd4b0;
+
   }
 
   /* === LIGHT MODE === */
