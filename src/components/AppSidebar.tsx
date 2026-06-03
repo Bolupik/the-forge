@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, LayoutGroup } from 'framer-motion';
 import { AppPage } from '@/lib/cardforge';
 
 interface AppSidebarProps {
