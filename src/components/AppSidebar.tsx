@@ -124,59 +124,75 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
         </div>
 
         {/* Nav items */}
-        <div className="flex-1 flex flex-col gap-1.5 px-2 py-5">
-          {NAV_ITEMS.map(({ page, label, icon }) => {
-            const active = activePage === page;
-            const hovered = hoveredPage === page;
-            return (
-              <button
-                key={page}
-                onClick={() => onNavigate(page)}
-                onMouseEnter={() => setHoveredPage(page)}
-                onMouseLeave={() => setHoveredPage(null)}
-                className="relative flex items-center gap-3 rounded-xl transition-all duration-300"
-                style={{
-                  padding: collapsed ? '12px 0' : '12px 14px',
-                  justifyContent: collapsed ? 'center' : 'flex-start',
-                  color: active ? 'var(--cf-gold)' : hovered ? 'var(--cf-text)' : 'var(--cf-muted2)',
-                  background: active ? 'rgba(200,168,75,0.08)' : hovered ? 'rgba(255,255,255,0.02)' : 'transparent',
-                  border: active ? '1px solid rgba(200,168,75,0.15)' : '1px solid transparent',
-                  transform: hovered && !active ? 'translateX(4px)' : 'translateX(0)',
-                }}
-                title={collapsed ? label : undefined}
-              >
-                {/* Active indicator */}
-                {active && (
-                  <div
-                    className="absolute left-0 top-[15%] bottom-[15%] w-[2.5px] rounded-full"
-                    style={{
-                      background: 'linear-gradient(180deg, var(--cf-gold), var(--cf-gold2))',
-                      boxShadow: '0 0 8px rgba(200,168,75,0.5)',
-                    }}
-                  />
-                )}
-                <span
-                  className="text-lg transition-all duration-300"
+        <LayoutGroup id="sidebar-nav">
+          <div className="flex-1 flex flex-col gap-1.5 px-2 py-5">
+            {NAV_ITEMS.map(({ page, label, icon }) => {
+              const active = activePage === page;
+              const hovered = hoveredPage === page;
+              return (
+                <button
+                  key={page}
+                  onClick={() => onNavigate(page)}
+                  onMouseEnter={() => setHoveredPage(page)}
+                  onMouseLeave={() => setHoveredPage(null)}
+                  className="relative flex items-center gap-3 rounded-xl transition-all duration-300"
                   style={{
-                    transform: active ? 'scale(1.2)' : hovered ? 'scale(1.1)' : 'scale(1)',
-                    filter: active ? 'drop-shadow(0 0 6px rgba(200,168,75,0.4))' : 'none',
+                    padding: collapsed ? '12px 0' : '12px 14px',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    color: active ? 'var(--cf-gold)' : hovered ? 'var(--cf-text)' : 'var(--cf-muted2)',
+                    background: hovered && !active ? 'rgba(255,255,255,0.02)' : 'transparent',
+                    border: '1px solid transparent',
+                    transform: hovered && !active ? 'translateX(4px)' : 'translateX(0)',
                   }}
+                  title={collapsed ? label : undefined}
                 >
-                  {icon}
-                </span>
-                {!collapsed && (
-                  <span className="font-ui text-sm font-semibold truncate transition-all duration-300">{label}</span>
-                )}
-                {page === 'trading' && tradeCount > 0 && (
+                  {/* Shared active background */}
+                  {active && (
+                    <motion.div
+                      layoutId="sidebar-active-bg"
+                      className="absolute inset-0 rounded-xl"
+                      style={{
+                        background: 'rgba(200,168,75,0.08)',
+                        border: '1px solid rgba(200,168,75,0.15)',
+                      }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  {/* Shared rail */}
+                  {active && (
+                    <motion.div
+                      layoutId="sidebar-active-rail"
+                      className="absolute left-0 top-[15%] bottom-[15%] w-[2.5px] rounded-full"
+                      style={{
+                        background: 'linear-gradient(180deg, var(--cf-gold), var(--cf-gold2))',
+                        boxShadow: '0 0 8px rgba(200,168,75,0.5)',
+                      }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
                   <span
-                    className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse-dot"
-                    style={{ background: 'var(--cf-gold)', boxShadow: '0 0 8px rgba(200,168,75,0.6)' }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
+                    className="relative text-lg transition-all duration-300"
+                    style={{
+                      transform: active ? 'scale(1.2)' : hovered ? 'scale(1.1)' : 'scale(1)',
+                      filter: active ? 'drop-shadow(0 0 6px rgba(200,168,75,0.4))' : 'none',
+                    }}
+                  >
+                    {icon}
+                  </span>
+                  {!collapsed && (
+                    <span className="relative font-ui text-sm font-semibold truncate transition-all duration-300">{label}</span>
+                  )}
+                  {page === 'trading' && tradeCount > 0 && (
+                    <span
+                      className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse-dot"
+                      style={{ background: 'var(--cf-gold)', boxShadow: '0 0 8px rgba(200,168,75,0.6)' }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </LayoutGroup>
 
         {/* Wallet button */}
         <div className="px-2 pb-3">
