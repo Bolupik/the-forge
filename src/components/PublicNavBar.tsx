@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppPage } from '@/lib/cardforge';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
-import ThemeToggle from '@/components/ThemeToggle';
 
 interface PublicNavBarProps {
   activePage: AppPage;
@@ -93,20 +92,6 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
           );
         })}
       </div>
-
-      <button
-        onClick={() => navigate('/demo-mint')}
-        className="hidden sm:inline-flex items-center gap-1 font-ui text-[0.6rem] uppercase tracking-[0.18em] font-bold mr-2 px-2.5 py-1 rounded-md transition-all hover:-translate-y-0.5 active:scale-95"
-        style={{
-          color: '#fff',
-          background: 'linear-gradient(135deg, #c44512, #ff6a2a)',
-          boxShadow: '0 2px 12px rgba(255,106,42,0.35)',
-        }}
-        title="Mint without connecting a wallet"
-      >
-        ⚡ Demo
-      </button>
-      <ThemeToggle compact className="mr-2 shrink-0" />
 
       {/* Wallet Connect / User Menu */}
       {isAuthenticated && userData ? (

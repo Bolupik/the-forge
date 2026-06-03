@@ -206,7 +206,7 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
                   }}
                 >
                   <div className="origin-top-left" style={{ transform: 'scale(0.7)', width: '142%', height: '142%' }}>
-                    <NFTCardComponent card={card} index={0} trades={[]} assemble={isRevealed} />
+                    <NFTCardComponent card={card} index={0} trades={[]} />
                   </div>
                   {/* Rare halo */}
                   {isShowcase && (

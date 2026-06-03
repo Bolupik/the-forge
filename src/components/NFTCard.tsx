@@ -7,10 +7,12 @@ interface NFTCardComponentProps {
   showDelete?: boolean;
   onDelete?: (id: string) => void;
   trades?: Trade[];
-  staticMode?: boolean;
-  assemble?: boolean;
 }
 
+/**
+ * Thin wrapper — all visual presentation lives in ForgeCard.
+ * Kept here so existing imports of `@/components/NFTCard` keep working.
+ */
 const NFTCardComponent = (props: NFTCardComponentProps) => <ForgeCard {...props} />;
 
 export default NFTCardComponent;

@@ -81,47 +81,6 @@ export const generateStats = (rarity: Rarity): CardStats => {
   };
 };
 
-// Demo / fallback card generator — synthesizes random NFTCards without
-// requiring backend packs or seeded templates. Used by "Demo Mint".
-const DEMO_NAMES = [
-  'Ashen Wraith', 'Cobalt Sentinel', 'Solar Reaver', 'Voidborn Oracle',
-  'Molten Drifter', 'Quartz Herald', 'Obsidian Sigil', 'Storm Acolyte',
-  'Ember Conduit', 'Glass Leviathan', 'Onyx Prophet', 'Aurora Husk',
-];
-
-const RARITY_ROLL: Rarity[] = [
-  'common','common','common','common','common','common',
-  'rare','rare','rare',
-  'epic','epic',
-  'legendary',
-];
-
-export const generateDemoCards = (count = 5): NFTCard[] => {
-  const cards = getCards();
-  const baseSerial = cards.length;
-  const drawn: NFTCard[] = [];
-  for (let i = 0; i < count; i++) {
-    const rarity = RARITY_ROLL[Math.floor(Math.random() * RARITY_ROLL.length)];
-    const name = DEMO_NAMES[Math.floor(Math.random() * DEMO_NAMES.length)];
-    const element = ELEMENTS[Math.floor(Math.random() * ELEMENTS.length)];
-    drawn.push({
-      id: crypto.randomUUID(),
-      templateId: 'demo',
-      name,
-      description: 'Demo-forged relic — not on-chain.',
-      rarity,
-      stats: generateStats(rarity),
-      element,
-      imageUrl: '',
-      metadataUrl: '',
-      serial: baseSerial + i + 1,
-      createdAt: new Date().toISOString(),
-    });
-  }
-  saveCards([...cards, ...drawn]);
-  return drawn;
-};
-
 // Templates (admin-created card blueprints)
 export const getTemplates = (): CardTemplate[] => {
   try { return JSON.parse(localStorage.getItem('cf_templates_v1') || '[]'); }

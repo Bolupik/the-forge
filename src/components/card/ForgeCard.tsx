@@ -12,13 +12,11 @@ interface Props {
   trades?: Trade[];
   /** Disable parallax tilt + holo cursor tracking (use in dense grids) */
   staticMode?: boolean;
-  /** Play the staged "frame assembles" reveal sequence */
-  assemble?: boolean;
 }
 
 const STAT_KEYS = ['ATK', 'DEF', 'SPD', 'SPC'] as const;
 
-const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticMode = false, assemble = false }: Props) => {
+const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticMode = false }: Props) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const [hovered, setHovered] = useState(false);
@@ -75,7 +73,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
   return (
     <div
       ref={rootRef}
-      className={`forge-card-root group w-[260px] h-[378px] sm:w-[285px] sm:h-[410px] relative ${assemble ? 'forge-assemble' : ''}`}
+      className="forge-card-root group w-[260px] h-[378px] sm:w-[285px] sm:h-[410px] relative"
       style={{ animationDelay: `${index * 0.06}s` }}
       onMouseMove={onMove}
       onMouseEnter={() => setHovered(true)}
@@ -83,7 +81,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
     >
       {/* Outer aura / glow */}
       <div
-        className="forge-stage-bloom absolute -inset-3 rounded-[26px] pointer-events-none transition-opacity duration-500"
+        className="absolute -inset-3 rounded-[26px] pointer-events-none transition-opacity duration-500"
         style={{
           background: `radial-gradient(ellipse at center, ${tok.glow}, transparent 70%)`,
           opacity: hovered ? 1 : 0.55,
@@ -94,7 +92,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
       {/* Legendary aurora ring */}
       {tok.aurora && (
         <div
-          className="forge-aurora forge-stage-bloom absolute -inset-2 rounded-[24px] pointer-events-none"
+          className="forge-aurora absolute -inset-2 rounded-[24px] pointer-events-none"
           style={{ opacity: hovered ? 0.85 : 0.6 }}
         />
       )}
@@ -105,7 +103,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
       >
         {/* ============ SVG BEZEL ============ */}
         <svg
-          className="forge-bezel-svg absolute inset-0 w-full h-full pointer-events-none"
+          className="absolute inset-0 w-full h-full pointer-events-none"
           viewBox="0 0 285 410"
           preserveAspectRatio="none"
           aria-hidden
@@ -142,7 +140,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
         <div className="relative w-full h-full p-[14px] flex flex-col" style={{ paddingTop: 14, paddingBottom: 14 }}>
 
           {/* Top sigil row */}
-          <div className="forge-stage-sigils flex justify-between items-center px-[2px] pb-[8px]">
+          <div className="flex justify-between items-center px-[2px] pb-[8px]">
             <div className="flex items-center gap-1.5">
               <SigilGlyph variant={tok.sigil} color={tok.accent} size={13} />
               <span
@@ -162,7 +160,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
 
           {/* Art window */}
           <div
-            className="forge-stage-art relative flex-1 min-h-[145px] rounded-[6px] overflow-hidden"
+            className="relative flex-1 min-h-[145px] rounded-[6px] overflow-hidden"
             style={{
               background: 'radial-gradient(ellipse at center, #1a1a2e, #0a0a14)',
               border: '1px solid rgba(255,255,255,0.07)',
@@ -223,7 +221,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
           </div>
 
           {/* Name strip */}
-          <div className="forge-stage-data pt-[10px] pb-[6px] flex items-baseline justify-between gap-2">
+          <div className="pt-[10px] pb-[6px] flex items-baseline justify-between gap-2">
             <span
               className="font-display text-[0.82rem] truncate"
               style={{ color: 'var(--cf-text)', textShadow: `0 0 8px ${tok.glow}` }}
@@ -275,7 +273,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
           </div>
 
           {/* Footer */}
-          <div className="forge-stage-footer flex justify-between items-center pt-[6px]" style={{ borderTop: `1px solid ${tok.accent}22` }}>
+          <div className="flex justify-between items-center pt-[6px]" style={{ borderTop: `1px solid ${tok.accent}22` }}>
             <span className="font-mono text-[0.48rem] tracking-wider" style={{ color: 'var(--cf-muted)' }}>
               #{String(card.serial).padStart(4, '0')} · CARDFORGE
             </span>

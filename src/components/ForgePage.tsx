@@ -211,29 +211,6 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
     saveTemplates(all);
     setTemplates(all);
 
-    // Push to the shared mint pool so the public Mint page can draw this card.
-    try {
-      const { error: regErr } = await supabase.functions.invoke('register-template', {
-        body: {
-          adminPass: 'bolupik',
-          template: {
-            name: template.name,
-            description: template.description,
-            rarity: template.rarity,
-            element: template.element,
-            stats: template.stats,
-            image_url: template.imageUrl,
-            metadata_url: template.metadataUrl,
-            supply: template.supply,
-          },
-        },
-      });
-      if (regErr) console.error('register-template failed', regErr);
-    } catch (e) {
-      console.error('register-template invoke error', e);
-    }
-
-
     // Reset form
     setName('');
     setDescription('');

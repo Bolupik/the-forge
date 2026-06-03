@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AppPage } from '@/lib/cardforge';
-import ThemeToggle from '@/components/ThemeToggle';
 
 interface AppSidebarProps {
   activePage: AppPage;
@@ -174,11 +173,6 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
               </button>
             );
           })}
-        </div>
-
-        {/* Theme toggle */}
-        <div className={`px-2 pb-2 flex ${collapsed ? 'justify-center' : 'justify-end'}`}>
-          <ThemeToggle compact />
         </div>
 
         {/* Wallet button */}

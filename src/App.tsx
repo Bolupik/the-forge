@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StacksAuthProvider } from "@/contexts/StacksAuthContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -12,7 +11,6 @@ import Auth from "./pages/Auth.tsx";
 import Account from "./pages/Account.tsx";
 import Gallery from "./pages/Gallery.tsx";
 import Mint from "./pages/Mint.tsx";
-import DemoMint from "./pages/DemoMint.tsx";
 import Trading from "./pages/Trading.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -20,7 +18,6 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -62,14 +59,12 @@ const App = () => (
               }
             />
             <Route path="/admin" element={<Admin />} />
-            <Route path="/demo-mint" element={<DemoMint />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </StacksAuthProvider>
       </BrowserRouter>
     </TooltipProvider>
-    </ThemeProvider>
   </QueryClientProvider>
 );
 
