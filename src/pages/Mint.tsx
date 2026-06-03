@@ -1,7 +1,7 @@
 import ParticleField from '@/components/ParticleField';
 import PublicNavBar from '@/components/PublicNavBar';
 import MintPage from '@/components/MintPage';
-import { useState } from 'react';
+import PageTransition from '@/components/motion/PageTransition';
 import { useNavigate } from 'react-router-dom';
 import { AppPage, getTrades } from '@/lib/cardforge';
 
@@ -20,7 +20,9 @@ const Mint = () => {
       <ParticleField />
       <div className="relative z-10">
         <PublicNavBar activePage="mint" onNavigate={handleNavigate} tradeCount={trades.length} />
-        <MintPage />
+        <PageTransition>
+          <MintPage />
+        </PageTransition>
       </div>
     </div>
   );

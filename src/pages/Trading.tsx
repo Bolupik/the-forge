@@ -1,6 +1,7 @@
 import ParticleField from '@/components/ParticleField';
 import PublicNavBar from '@/components/PublicNavBar';
 import PublicTradingPage from '@/components/PublicTradingPage';
+import PageTransition from '@/components/motion/PageTransition';
 import { useNavigate } from 'react-router-dom';
 import { AppPage, getCards, getTrades } from '@/lib/cardforge';
 
@@ -20,7 +21,9 @@ const Trading = () => {
       <ParticleField />
       <div className="relative z-10">
         <PublicNavBar activePage="trading" onNavigate={handleNavigate} tradeCount={trades.length} />
-        <PublicTradingPage cards={cards} trades={trades} />
+        <PageTransition>
+          <PublicTradingPage cards={cards} trades={trades} />
+        </PageTransition>
       </div>
     </div>
   );
