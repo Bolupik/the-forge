@@ -41,12 +41,14 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
             >
               {/* Active glow */}
               {active && (
-                <div
+                <motion.div
+                  layoutId="nav-mobile-glow"
                   className="absolute -top-px left-[20%] right-[20%] h-[2px] rounded-full"
                   style={{
                     background: 'linear-gradient(90deg, transparent, var(--cf-gold), transparent)',
                     boxShadow: '0 0 12px rgba(200,168,75,0.5)',
                   }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 />
               )}
               <span
