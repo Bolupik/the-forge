@@ -101,6 +101,8 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
         className="forge-card-inner relative w-full h-full"
         style={{ clipPath }}
       >
+        {/* Continuous rarity-specific frame FX */}
+        <div className={`forge-frame-fx rarity-${card.rarity}`} aria-hidden />
         {/* ============ SVG BEZEL ============ */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none"
