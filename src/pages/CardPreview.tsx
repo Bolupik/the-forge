@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ForgeCard from '@/components/card/ForgeCard';
 import { Rarity, NFTCard, generateStats, ELEMENTS } from '@/lib/cardforge';
 import { Slider } from '@/components/ui/slider';
