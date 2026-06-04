@@ -13,6 +13,7 @@ import Gallery from "./pages/Gallery.tsx";
 import Mint from "./pages/Mint.tsx";
 import Trading from "./pages/Trading.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import CardPreview from "./pages/CardPreview.tsx";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
               }
             />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/card-preview" element={<CardPreview />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
