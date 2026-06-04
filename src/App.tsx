@@ -60,6 +60,7 @@ const App = () => (
               }
             />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/card-preview" element={<CardPreview />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
