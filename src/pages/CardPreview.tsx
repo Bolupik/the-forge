@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ForgeCard from '@/components/card/ForgeCard';
 import { Rarity, NFTCard, generateStats, ELEMENTS } from '@/lib/cardforge';
 import { Slider } from '@/components/ui/slider';
@@ -27,9 +27,24 @@ const makeCard = (rarity: Rarity): NFTCard => ({
 });
 
 const CardPreview = () => {
-  const [rarity, setRarity] = useState<Rarity>('legendary');
-  const [intensity, setIntensity] = useState(1);
-  const [staticMode, setStaticMode] = useState(false);
+  const getSavedPreview = () => {
+    try {
+      const raw = localStorage.getItem('cf_preview_settings_v1');
+      if (raw) return JSON.parse(raw) as { rarity: Rarity; intensity: number; staticMode: boolean };
+    } catch { /* ignore */ }
+    return null;
+  };
+
+  const saved = getSavedPreview();
+  const validRarity = (r: string): r is Rarity => RARITIES.includes(r as Rarity);
+
+  const [rarity, setRarity] = useState<Rarity>(saved && validRarity(saved.rarity) ? saved.rarity : 'legendary');
+  const [intensity, setIntensity] = useState(saved && typeof saved.intensity === 'number' ? saved.intensity : 1);
+  const [staticMode, setStaticMode] = useState(saved && typeof saved.staticMode === 'boolean' ? saved.staticMode : false);
+
+  useEffect(() => {
+    localStorage.setItem('cf_preview_settings_v1', JSON.stringify({ rarity, intensity, staticMode }));
+  }, [rarity, intensity, staticMode]);
 
   const card = useMemo(() => makeCard(rarity), [rarity]);
 
