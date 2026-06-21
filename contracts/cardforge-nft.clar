@@ -10,25 +10,27 @@
 ;;                 explorers automatically recognize and display the cards.
 ;;
 ;; Deployment notes:
-;;   - This file is self-contained (the SIP-009 trait is declared and
-;;     implemented in the same contract), so it deploys with zero
-;;     external dependencies on Hiro Platform, Clarinet, or any explorer.
+;;   - This contract structurally implements SIP-009 (all four required
+;;     functions + define-non-fungible-token) WITHOUT a top-level
+;;     (define-trait ...) declaration. This avoids the Hiro Platform /
+;;     Xverse "Asset Transfers Detected" warning during deployment
+;;     while remaining fully recognizable to Leather, Xverse, and
+;;     Stacks explorers as an NFT contract.
 ;;   - Run `clarinet check` before deploying if you have Clarinet locally.
 ;;   - get-token-uri returns a per-token JSON metadata link that you set
 ;;     at mint time (see the metadata schema note at the bottom of this file).
 ;; ============================================================
 
 ;; ------------------------------------------------------------
-;; SIP-009 TRAIT (declared + implemented locally, no import needed)
+;; SIP-009 INTERFACE (structurally implemented — see read-only +
+;; transfer functions below). We intentionally do NOT declare a
+;; top-level (define-trait ...) here: Hiro Platform / Xverse will
+;; otherwise classify the deploy tx as "Asset Transfers Detected"
+;; and surface a 400-style warning. Wallets and explorers detect
+;; SIP-009 by function shape (get-last-token-id, get-token-uri,
+;; get-owner, transfer) and the (define-non-fungible-token ...)
+;; declaration, all of which are present in this contract.
 ;; ------------------------------------------------------------
-(define-trait sip009-nft-trait
-  (
-    (get-last-token-id () (response uint uint))
-    (get-token-uri (uint) (response (optional (string-ascii 256)) uint))
-    (get-owner (uint) (response (optional principal) uint))
-    (transfer (uint principal principal) (response bool uint))
-  )
-)
 
 ;; ------------------------------------------------------------
 ;; CONSTANTS
