@@ -25,7 +25,7 @@ export const explorerTxUrl = (txid: string, network: StacksNetwork) =>
 
 interface MintArgs {
   card: NFTCard;
-  recipient: string;       // user's STX address
+  recipient: string;       // signer's STX address (tx-sender)
 }
 
 interface MintResult {
@@ -37,11 +37,11 @@ interface MintResult {
 /**
  * 1. Ensure card has a public-https metadata URL (uploads to Supabase Storage
  *    via the store-card-metadata edge function if missing).
- * 2. Prompts the user's wallet to call (mint recipient token-uri) on the
- *    CardForge SIP-009 contract.
+ * 2. Prompts the user's wallet to call mint-card on the CardForge SIP-009
+ *    contract. The signer (tx-sender) is the recipient.
  * 3. Persists the resulting txid + pending status on the card row.
  */
-export const mintCardOnChain = async ({ card, recipient }: MintArgs): Promise<MintResult> => {
+export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> => {
   const cfg = getContractConfig();
   if (!cfg) throw new Error('Contract not configured. Set VITE_STACKS_CONTRACT_ADDRESS in env.');
 
@@ -64,13 +64,28 @@ export const mintCardOnChain = async ({ card, recipient }: MintArgs): Promise<Mi
   const metadataUrl: string = pinned.metadataUrl;
   const imageUrl: string = pinned.imageUrl;
 
-  // Truncate to 256 ascii per Clarity contract
-  const tokenUri = metadataUrl.slice(0, 256);
+  // Map NFTCard fields to the contract's mint-card arguments.
+  // Truncate to Clarity string-ascii limits.
+  const name = card.name.trim().slice(0, 64);
+  const rarity = card.rarity.trim().slice(0, 16);
+  const cardType = card.element.trim().slice(0, 32);
+  const power = Math.max(0, Math.floor(card.stats.ATK));
+  const defense = Math.max(0, Math.floor(card.stats.DEF));
+  const imageUri = imageUrl.trim().slice(0, 256);
+  const tokenUri = metadataUrl.trim().slice(0, 256);
 
   const result = await request('stx_callContract', {
     contract: `${cfg.address}.${cfg.name}` as `${string}.${string}`,
-    functionName: 'mint',
-    functionArgs: [Cl.principal(recipient), Cl.stringAscii(tokenUri)],
+    functionName: 'mint-card',
+    functionArgs: [
+      Cl.stringAscii(name),
+      Cl.stringAscii(rarity),
+      Cl.stringAscii(cardType),
+      Cl.uint(power),
+      Cl.uint(defense),
+      Cl.stringAscii(imageUri),
+      Cl.stringAscii(tokenUri),
+    ],
     network: cfg.network,
   });
 
