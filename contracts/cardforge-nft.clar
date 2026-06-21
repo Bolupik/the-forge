@@ -10,9 +10,12 @@
 ;;                 explorers automatically recognize and display the cards.
 ;;
 ;; Deployment notes:
-;;   - This file is self-contained (the SIP-009 trait is declared and
-;;     implemented in the same contract), so it deploys with zero
-;;     external dependencies on Hiro Platform, Clarinet, or any explorer.
+;;   - This contract structurally implements SIP-009 (all four required
+;;     functions + define-non-fungible-token) WITHOUT a top-level
+;;     (define-trait ...) declaration. This avoids the Hiro Platform /
+;;     Xverse "Asset Transfers Detected" warning during deployment
+;;     while remaining fully recognizable to Leather, Xverse, and
+;;     Stacks explorers as an NFT contract.
 ;;   - Run `clarinet check` before deploying if you have Clarinet locally.
 ;;   - get-token-uri returns a per-token JSON metadata link that you set
 ;;     at mint time (see the metadata schema note at the bottom of this file).
