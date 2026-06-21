@@ -19,16 +19,15 @@
 ;; ============================================================
 
 ;; ------------------------------------------------------------
-;; SIP-009 TRAIT (declared + implemented locally, no import needed)
+;; SIP-009 INTERFACE (structurally implemented — see read-only +
+;; transfer functions below). We intentionally do NOT declare a
+;; top-level (define-trait ...) here: Hiro Platform / Xverse will
+;; otherwise classify the deploy tx as "Asset Transfers Detected"
+;; and surface a 400-style warning. Wallets and explorers detect
+;; SIP-009 by function shape (get-last-token-id, get-token-uri,
+;; get-owner, transfer) and the (define-non-fungible-token ...)
+;; declaration, all of which are present in this contract.
 ;; ------------------------------------------------------------
-(define-trait sip009-nft-trait
-  (
-    (get-last-token-id () (response uint uint))
-    (get-token-uri (uint) (response (optional (string-ascii 256)) uint))
-    (get-owner (uint) (response (optional principal) uint))
-    (transfer (uint principal principal) (response bool uint))
-  )
-)
 
 ;; ------------------------------------------------------------
 ;; CONSTANTS
