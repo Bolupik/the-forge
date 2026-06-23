@@ -113,7 +113,7 @@
     (asserts! (var-get mint-enabled) err-mint-disabled)
     (asserts! (<= new-id (var-get max-supply)) err-max-supply)
     (asserts! (is-valid-rarity rarity) err-invalid-rarity)
-    (try! (stx-transfer? (var-get mint-price) tx-sender contract-owner))
+    (try! (stx-transfer? (var-get mint-price) tx-sender (var-get treasury)))
     (try! (nft-mint? cardforge-card new-id tx-sender))
     (map-set card-metadata new-id {
       name: name,
