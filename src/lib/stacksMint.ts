@@ -5,6 +5,22 @@ import type { NFTCard } from '@/lib/cardforge';
 
 export type StacksNetwork = 'mainnet' | 'testnet';
 
+const NETWORK_LS_KEY = 'cf_stacks_network_v1';
+
+export const getSelectedNetwork = (): StacksNetwork => {
+  if (typeof window === 'undefined') return 'testnet';
+  const stored = localStorage.getItem(NETWORK_LS_KEY);
+  if (stored === 'mainnet' || stored === 'testnet') return stored;
+  // Fall back to env for the very first load.
+  const env = (import.meta.env.VITE_STACKS_NETWORK as string | undefined) ?? 'testnet';
+  return env === 'mainnet' ? 'mainnet' : 'testnet';
+};
+
+export const setSelectedNetwork = (network: StacksNetwork) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(NETWORK_LS_KEY, network);
+};
+
 export interface ContractConfig {
   address: string;
   name: string;
@@ -12,12 +28,33 @@ export interface ContractConfig {
 }
 
 export const getContractConfig = (): ContractConfig | null => {
-  const address = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS as string | undefined;
+  const network = getSelectedNetwork();
   const name = (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft';
-  // Hard-locked to testnet for now. Ignore VITE_STACKS_NETWORK until mainnet launch.
-  const network: StacksNetwork = 'testnet';
+
+  // 1. Legacy single-address override (highest priority)
+  const legacyAddress = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS as string | undefined;
+  // 2. Per-network address
+  const networkAddress =
+    network === 'mainnet'
+      ? (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_MAINNET as string | undefined)
+      : (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_TESTNET as string | undefined);
+
+  const address = legacyAddress?.trim() || networkAddress?.trim();
   if (!address) return null;
   return { address, name, network };
+};
+
+export const getTreasuryAddress = (): string | null => {
+  const network = getSelectedNetwork();
+
+  const legacy = import.meta.env.VITE_STACKS_TREASURY_ADDRESS as string | undefined;
+  const perNetwork =
+    network === 'mainnet'
+      ? (import.meta.env.VITE_STACKS_TREASURY_ADDRESS_MAINNET as string | undefined)
+      : (import.meta.env.VITE_STACKS_TREASURY_ADDRESS_TESTNET as string | undefined);
+
+  const addr = legacy?.trim() || perNetwork?.trim();
+  return addr || null;
 };
 
 export const explorerTxUrl = (txid: string, network: StacksNetwork) =>
@@ -43,7 +80,7 @@ interface MintResult {
  */
 export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> => {
   const cfg = getContractConfig();
-  if (!cfg) throw new Error('Contract not configured. Set VITE_STACKS_CONTRACT_ADDRESS in env.');
+  if (!cfg) throw new Error('Contract not configured. Set the contract address for the selected network in env.');
 
   // Pin metadata to Supabase Storage (SIP-016 compatible)
   const { data: pinned, error: pinErr } = await supabase.functions.invoke('store-card-metadata', {
