@@ -37,6 +37,10 @@
 ;; ------------------------------------------------------------
 (define-constant contract-owner tx-sender)
 
+;; Treasury wallet that receives all mint payments (STX) on testnet/mainnet.
+;; Admin can change this via (set-treasury ...) below.
+(define-data-var treasury principal 'ST6E59CS9Z7J1G5SDTH65B526G7HM59RENBCJKE6)
+
 (define-constant err-owner-only        (err u100))
 (define-constant err-not-token-owner   (err u101))
 (define-constant err-token-not-found   (err u102))
