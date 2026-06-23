@@ -287,7 +287,8 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
 
             {!contractCfg && (
               <p className="font-body text-[0.6rem] text-center" style={{ color: 'var(--cf-muted)' }}>
-                Set <code>VITE_STACKS_CONTRACT_ADDRESS</code> in env to enable on-chain mint.
+                Set the contract address for the selected network in env
+                (<code>VITE_STACKS_CONTRACT_ADDRESS_TESTNET</code> / <code>VITE_STACKS_CONTRACT_ADDRESS_MAINNET</code>).
               </p>
             )}
 
