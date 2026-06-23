@@ -48,9 +48,10 @@ Use this only for local Clarinet-style testing.
 4. In Xverse, switch Stacks network to **Testnet4**.
 5. Approve the deployment.
 6. After confirmation, set:
-   - `VITE_STACKS_CONTRACT_ADDRESS=<deployer-address>`
+   - `VITE_STACKS_CONTRACT_ADDRESS_TESTNET=<deployer-address>`
    - `VITE_STACKS_CONTRACT_NAME=cardforge-nft`
-   - `VITE_STACKS_NETWORK=testnet`
+   - Optionally `VITE_STACKS_TREASURY_ADDRESS_TESTNET=<your-treasury-wallet>`
+7. In the webapp, use the **testnet/mainnet** toggle on the Mint page to switch networks.
 
 ### Mainnet
 
@@ -58,9 +59,10 @@ Use this only for local Clarinet-style testing.
 2. In Xverse, switch off Testnet and use your **mainnet** account.
 3. Deploy the exact same contract code.
 4. After confirmation, update:
-   - `VITE_STACKS_CONTRACT_ADDRESS=<mainnet-deployer-address>`
+   - `VITE_STACKS_CONTRACT_ADDRESS_MAINNET=<mainnet-deployer-address>`
    - `VITE_STACKS_CONTRACT_NAME=cardforge-nft`
-   - `VITE_STACKS_NETWORK=mainnet`
+   - `VITE_STACKS_TREASURY_ADDRESS_MAINNET=<your-mainnet-treasury>`
+5. Use the Mint page network toggle to switch to mainnet when you are ready.
 
 ## Rules that prevent future deploy errors
 
