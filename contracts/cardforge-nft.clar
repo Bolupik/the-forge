@@ -37,6 +37,10 @@
 ;; ------------------------------------------------------------
 (define-constant contract-owner tx-sender)
 
+;; Treasury wallet that receives all mint payments (STX) on testnet/mainnet.
+;; Admin can change this via (set-treasury ...) below.
+(define-data-var treasury principal 'ST6E59CS9Z7J1G5SDTH65B526G7HM59RENBCJKE6)
+
 (define-constant err-owner-only        (err u100))
 (define-constant err-not-token-owner   (err u101))
 (define-constant err-token-not-found   (err u102))
@@ -109,7 +113,7 @@
     (asserts! (var-get mint-enabled) err-mint-disabled)
     (asserts! (<= new-id (var-get max-supply)) err-max-supply)
     (asserts! (is-valid-rarity rarity) err-invalid-rarity)
-    (try! (stx-transfer? (var-get mint-price) tx-sender contract-owner))
+    (try! (stx-transfer? (var-get mint-price) tx-sender (var-get treasury)))
     (try! (nft-mint? cardforge-card new-id tx-sender))
     (map-set card-metadata new-id {
       name: name,
@@ -281,6 +285,19 @@
     (asserts! (is-eq tx-sender contract-owner) err-owner-only)
     (asserts! (>= new-max (var-get last-token-id)) err-invalid-supply)
     (var-set max-supply new-max)
+    (ok true)
+  )
+)
+
+(define-read-only (get-treasury)
+  (ok (var-get treasury))
+)
+
+(define-public (set-treasury (new-treasury principal))
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (var-set treasury new-treasury)
+    (print { event: "treasury-updated", treasury: new-treasury })
     (ok true)
   )
 )
