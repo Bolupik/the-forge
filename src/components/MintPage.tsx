@@ -122,7 +122,9 @@ const MintPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col px-4 py-8 sm:py-12">
+    <div key={networkVersion} className="relative min-h-screen flex flex-col px-4 py-8 sm:py-12">
+      <NetworkSwitch onChange={handleNetworkChange} />
+
       {/* Stats bar */}
       <div className="w-full max-w-[860px] mx-auto mb-6 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
