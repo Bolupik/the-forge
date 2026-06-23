@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { NFTCard } from '@/lib/cardforge';
 import { dbCardToNft, DbNftCard } from '@/lib/dbCards';
 import { supabase } from '@/integrations/supabase/client';
+import { type StacksNetwork } from '@/lib/stacksMint';
 import PackGrid from './mint/PackGrid';
 import PackOpenAnimation from './mint/PackOpenAnimation';
 import CardRevealSequence from './mint/CardRevealSequence';
+import NetworkSwitch from './NetworkSwitch';
+
 
 type Phase = 'pick' | 'opening' | 'revealing';
 
