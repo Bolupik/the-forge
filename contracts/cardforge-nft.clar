@@ -288,3 +288,16 @@
     (ok true)
   )
 )
+
+(define-read-only (get-treasury)
+  (ok (var-get treasury))
+)
+
+(define-public (set-treasury (new-treasury principal))
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (var-set treasury new-treasury)
+    (print { event: "treasury-updated", treasury: new-treasury })
+    (ok true)
+  )
+)
