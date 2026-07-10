@@ -26,4 +26,6 @@ dist-ssr
 # Never commit wallet mnemonics
 settings/Testnet.toml
 settings/Mainnet.toml
-.env
+
+# NOTE: .env is intentionally tracked. Lovable builds from this repo and needs
+# it; it holds only publishable values (VITE_* vars ship in the JS bundle anyway).
