@@ -1,0 +1,2 @@
+# Clarity contracts must keep LF endings — the Clarity parser rejects CRLF.
+*.clar text eol=lf

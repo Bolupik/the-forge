@@ -1,0 +1,17 @@
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: https://api.testnet.hiro.so
+bitcoin-node: http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332
+plan:
+  batches:
+  - id: 0
+    transactions:
+    - transaction-type: contract-publish
+      contract-name: cardforge-nft
+      expected-sender: STFZPM830QBMN1P2QJ6WQXTM788Z5PV35TWA3JGB
+      cost: 107670
+      path: contracts/cardforge-nft.clar
+      anchor-block-only: true
+      clarity-version: 2
+    epoch: '2.4'

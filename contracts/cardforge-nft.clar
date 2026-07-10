@@ -22,7 +22,7 @@
 ;; ============================================================
 
 ;; ------------------------------------------------------------
-;; SIP-009 INTERFACE (structurally implemented — see read-only +
+;; SIP-009 INTERFACE (structurally implemented -- see read-only +
 ;; transfer functions below). We intentionally do NOT declare a
 ;; top-level (define-trait ...) here: Hiro Platform / Xverse will
 ;; otherwise classify the deploy tx as "Asset Transfers Detected"
@@ -173,7 +173,7 @@
 )
 
 ;; ------------------------------------------------------------
-;; MARKETPLACE — fixed-price listings, escrowed atomic swap
+;; MARKETPLACE -- fixed-price listings, escrowed atomic swap
 ;; ------------------------------------------------------------
 (define-public (list-card-for-sale (token-id uint) (price uint))
   (let ((owner (unwrap! (nft-get-owner? cardforge-card token-id) err-token-not-found)))
