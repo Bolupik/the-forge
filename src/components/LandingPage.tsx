@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
 import PublicNavBar from './PublicNavBar';
 import { AppPage } from '@/lib/cardforge';
-import Reveal from './motion/Reveal';
-import MagneticButton from './motion/MagneticButton';
 import PageTransition from './motion/PageTransition';
 import { fadeUp, stagger } from '@/lib/motion';
 
@@ -23,215 +21,221 @@ const LandingPage = () => {
     else signIn();
   };
 
+  const features = [
+    {
+      title: 'Mystery Packs',
+      body: 'Uncover hidden rarities with weekly drop events. Free-to-mint limited supply.',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Battle Stats',
+      body: 'Every card carries ATK, DEF, SPD, SPC and HP — built for on-chain duels.',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'P2P Trading',
+      body: 'Trustless swaps powered by Stacks smart contracts — zero middleman fees.',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+      ),
+    },
+  ];
+
+  const rarities = [
+    { name: 'Common', color: '#7a7a82', border: 'rgba(85,85,95,0.6)', glow: 'inset 0 0 0 rgba(0,0,0,0)' },
+    { name: 'Rare', color: '#88c4ff', border: 'rgba(60,140,255,0.35)', glow: 'inset 0 0 10px rgba(60,140,255,0.12)' },
+    { name: 'Epic', color: '#d870ff', border: 'rgba(160,60,240,0.35)', glow: 'inset 0 0 15px rgba(160,60,240,0.14)' },
+    { name: 'Legendary', color: '#ff8a7a', border: 'rgba(224,72,58,0.55)', glow: '0 0 24px rgba(224,72,58,0.18)' },
+  ];
+
   return (
     <PageTransition>
       <PublicNavBar activePage={'gallery' as AppPage} onNavigate={handleNavigate} tradeCount={0} />
 
-      {/* HERO */}
-      <section className="relative px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-24 overflow-hidden">
+      <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 md:px-8 pt-6 sm:pt-10 pb-16">
         <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(200,168,75,0.18), transparent 60%)',
-          }}
-        />
-
-        <motion.div
-          className="max-w-5xl mx-auto text-center"
-          variants={stagger(0.08, 0.05)}
+          className="grid grid-cols-12 gap-3 sm:gap-4 auto-rows-min"
+          variants={stagger(0.07, 0.04)}
           initial="hidden"
           animate="show"
         >
-          <motion.div
+          {/* HERO TILE */}
+          <motion.section
             variants={fadeUp}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6 sm:mb-8"
-            style={{
-              background: 'rgba(200,168,75,0.07)',
-              border: '1px solid rgba(200,168,75,0.25)',
-            }}
+            className="col-span-12 md:col-span-8 md:row-span-2 relative overflow-hidden rounded-2xl p-6 sm:p-10 md:p-12 flex flex-col justify-between min-h-[420px] sm:min-h-[520px] group"
+            style={{ background: 'var(--cf-surface)', border: '1px solid var(--cf-border)' }}
           >
-            <span
-              className="w-1.5 h-1.5 rounded-full animate-pulse-dot"
-              style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(200,168,75,0.7)' }}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full transition-opacity duration-700 group-hover:opacity-30"
+              style={{ background: 'var(--cf-ember)', opacity: 0.12, filter: 'blur(100px)' }}
             />
-            <span
-              className="font-ui text-[0.6rem] sm:text-xs uppercase tracking-[0.2em]"
-              style={{ color: 'var(--cf-gold)' }}
-            >
-              Live · Free Mint
-            </span>
-          </motion.div>
+            <div className="relative z-10">
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6"
+                style={{ background: 'rgba(224,72,58,0.08)', border: '1px solid rgba(224,72,58,0.3)' }}
+              >
+                <span
+                  className="w-2 h-2 rounded-full animate-pulse-dot"
+                  style={{ background: 'var(--cf-ember-hi)', boxShadow: '0 0 8px rgba(255,106,90,0.7)' }}
+                />
+                <span className="font-ui text-[0.6rem] sm:text-xs font-bold uppercase tracking-[0.22em]" style={{ color: 'var(--cf-ember-hi)' }}>
+                  Live · Free Mint
+                </span>
+              </div>
+              <h1 className="font-display uppercase leading-[0.85] tracking-tight text-white text-5xl sm:text-7xl md:text-8xl mb-6">
+                Forge <br />
+                <span style={{ color: 'var(--cf-ember)' }}>Legendary</span> <br />
+                NFT Cards
+              </h1>
+              <p className="font-body max-w-md text-sm sm:text-base leading-relaxed" style={{ color: 'var(--cf-muted2)' }}>
+                A collectible card universe on Stacks. Open mystery packs, build your collection,
+                and trade peer-to-peer — fully on-chain, completely free to mint.
+              </p>
+            </div>
 
-          <motion.h1
-            variants={fadeUp}
-            className="font-display font-bold leading-[1.05] text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-5 sm:mb-7 text-gold-gradient"
-            style={{ textShadow: '0 0 40px rgba(200,168,75,0.25)' }}
-          >
-            Forge Legendary
-            <br />
-            NFT Cards
-          </motion.h1>
+            <div className="relative z-10 flex flex-wrap gap-3 mt-8">
+              <button
+                onClick={handlePrimary}
+                disabled={isLoading}
+                className="font-ui font-bold uppercase tracking-wider text-xs sm:text-sm px-7 py-3 rounded-md transition-colors disabled:opacity-50"
+                style={{ background: 'var(--cf-ember)', color: '#fff' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--cf-ember-hi)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--cf-ember)')}
+              >
+                {isAuthenticated ? '⚡ Open a Pack' : '🔗 Connect Wallet'}
+              </button>
+              <button
+                onClick={() => navigate('/gallery')}
+                className="font-ui font-bold uppercase tracking-wider text-xs sm:text-sm px-7 py-3 rounded-md border transition-colors"
+                style={{ borderColor: 'var(--cf-border)', color: 'var(--cf-text)', background: 'transparent' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--cf-surface3)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                View Gallery →
+              </button>
+            </div>
+          </motion.section>
 
-          <motion.p
-            variants={fadeUp}
-            className="font-body max-w-2xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed mb-8 sm:mb-10"
-            style={{ color: 'var(--cf-muted2)' }}
-          >
-            A collectible card universe on Stacks. Open mystery packs, build your collection,
-            and trade peer-to-peer — fully on-chain, completely free to mint.
-          </motion.p>
-
-          <motion.div
-            variants={fadeUp}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
-          >
-            <MagneticButton
-              onClick={handlePrimary}
-              disabled={isLoading}
-              className="group font-ui font-semibold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg disabled:opacity-50 w-full sm:w-auto"
-              style={{
-                color: '#0a0a14',
-                background: 'linear-gradient(135deg, #e8c66a, #c8a84b)',
-                boxShadow: '0 8px 28px rgba(200,168,75,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
-              }}
-            >
-              {isAuthenticated ? '⚡ Open a Pack' : '🔗 Connect Wallet'}
-            </MagneticButton>
-            <MagneticButton
-              onClick={() => navigate('/gallery')}
-              strength={8}
-              className="font-ui font-semibold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg border w-full sm:w-auto"
-              style={{
-                color: 'var(--cf-text)',
-                borderColor: 'var(--cf-border)',
-                background: 'rgba(255,255,255,0.03)',
-              }}
-            >
-              View Gallery →
-            </MagneticButton>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* STATS / FEATURE GRID */}
-      <section className="px-4 sm:px-6 pb-16 sm:pb-24">
-        <motion.div
-          className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
-          variants={stagger(0.08)}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          {[
-            { icon: '🎴', title: 'Mystery Packs', body: 'Each pack reveals 5 cards across Common, Rare, Epic and Legendary tiers.' },
-            { icon: '⚔️', title: 'Battle Stats', body: 'Every card has ATK, DEF, SPD, SPC and HP — built for future on-chain duels.' },
-            { icon: '⇄', title: 'P2P Trading', body: 'List, swap and collect rare cards directly with other players.' },
-          ].map((f) => (
+          {/* FEATURE TILES */}
+          {features.slice(0, 2).map((f) => (
             <motion.div
               key={f.title}
               variants={fadeUp}
-              whileHover={{ y: -4, transition: { duration: 0.25 } }}
-              className="p-5 sm:p-6 rounded-xl text-left"
-              style={{
-                background: 'var(--cf-surface)',
-                border: '1px solid var(--cf-border)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-              }}
+              whileHover={{ y: -3, transition: { duration: 0.25 } }}
+              className="col-span-12 sm:col-span-6 md:col-span-4 rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[190px] group"
+              style={{ background: 'var(--cf-surface)', border: '1px solid var(--cf-border)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(224,72,58,0.5)')}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--cf-border)')}
             >
-              <div className="text-2xl sm:text-3xl mb-3">{f.icon}</div>
-              <h3 className="font-display font-bold text-base sm:text-lg mb-1.5" style={{ color: 'var(--cf-gold)' }}>
-                {f.title}
-              </h3>
-              <p className="font-body text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--cf-muted2)' }}>
-                {f.body}
-              </p>
+              <div
+                className="w-11 h-11 rounded-lg flex items-center justify-center mb-6"
+                style={{ background: 'var(--cf-surface3)', border: '1px solid var(--cf-border)', color: 'var(--cf-ember)' }}
+              >
+                {f.icon}
+              </div>
+              <div>
+                <h3 className="font-display uppercase text-2xl sm:text-3xl leading-none mb-2 text-white">{f.title}</h3>
+                <p className="font-body text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--cf-muted2)' }}>{f.body}</p>
+              </div>
             </motion.div>
           ))}
-        </motion.div>
-      </section>
 
-      {/* RARITY STRIP */}
-      <section className="px-4 sm:px-6 pb-20 sm:pb-28">
-        <div className="max-w-5xl mx-auto">
-          <Reveal className="text-center mb-8 sm:mb-10">
-            <div className="font-ui text-[0.55rem] sm:text-[0.65rem] uppercase tracking-[0.3em] mb-2" style={{ color: 'var(--cf-muted)' }}>
-              Four Tiers
-            </div>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl md:text-4xl text-gold-gradient">
-              Every Card a Treasure
-            </h2>
-          </Reveal>
-
+          {/* THIRD FEATURE — P2P TRADING */}
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
-            variants={stagger(0.07)}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeUp}
+            whileHover={{ y: -3, transition: { duration: 0.25 } }}
+            className="col-span-12 sm:col-span-6 md:col-span-4 rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[190px]"
+            style={{ background: 'var(--cf-surface)', border: '1px solid var(--cf-border)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(224,72,58,0.5)')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--cf-border)')}
           >
-            {[
-              { name: 'Common', color: '#9ca3af', glow: 'rgba(156,163,175,0.25)' },
-              { name: 'Rare', color: '#60a5fa', glow: 'rgba(96,165,250,0.3)' },
-              { name: 'Epic', color: '#c084fc', glow: 'rgba(192,132,252,0.35)' },
-              { name: 'Legendary', color: '#fbbf24', glow: 'rgba(251,191,36,0.45)' },
-            ].map((r) => (
-              <motion.div
-                key={r.name}
-                variants={fadeUp}
-                whileHover={{ scale: 1.03, transition: { duration: 0.25 } }}
-                className="aspect-[3/4] rounded-lg p-3 flex items-end"
-                style={{
-                  background: `linear-gradient(160deg, ${r.color}22, transparent 70%), var(--cf-surface)`,
-                  border: `1px solid ${r.color}55`,
-                  boxShadow: `0 0 24px ${r.glow}`,
-                }}
-              >
-                <div className="font-display font-bold text-sm sm:text-base" style={{ color: r.color, textShadow: `0 0 12px ${r.glow}` }}>
-                  {r.name}
-                </div>
-              </motion.div>
-            ))}
+            <div
+              className="w-11 h-11 rounded-lg flex items-center justify-center mb-6"
+              style={{ background: 'var(--cf-surface3)', border: '1px solid var(--cf-border)', color: 'var(--cf-ember)' }}
+            >
+              {features[2].icon}
+            </div>
+            <div>
+              <h3 className="font-display uppercase text-2xl sm:text-3xl leading-none mb-2 text-white">{features[2].title}</h3>
+              <p className="font-body text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--cf-muted2)' }}>{features[2].body}</p>
+            </div>
           </motion.div>
-        </div>
-      </section>
 
-      {/* FINAL CTA */}
-      <section className="px-4 sm:px-6 pb-20 sm:pb-28">
-        <Reveal>
-          <div
-            className="max-w-3xl mx-auto text-center p-8 sm:p-12 rounded-2xl"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(200,168,75,0.08), transparent 70%), var(--cf-surface)',
-              border: '1px solid rgba(200,168,75,0.3)',
-              boxShadow: '0 12px 40px rgba(200,168,75,0.12)',
-            }}
+          {/* RARITY SHOWCASE TILE */}
+          <motion.section
+            variants={fadeUp}
+            className="col-span-12 md:col-span-8 rounded-2xl p-5 sm:p-6"
+            style={{ background: 'var(--cf-surface)', border: '1px solid var(--cf-border)' }}
           >
-            <h2 className="font-display font-bold text-2xl sm:text-3xl md:text-4xl mb-3 sm:mb-4 text-gold-gradient">
-              Your collection awaits
-            </h2>
-            <p className="font-body text-xs sm:text-sm md:text-base mb-6 sm:mb-8 max-w-md mx-auto" style={{ color: 'var(--cf-muted2)' }}>
-              Connect a Stacks wallet to claim your first pack. No fees. No catch.
-            </p>
-            <MagneticButton
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="font-display uppercase text-2xl sm:text-3xl leading-none text-white">Rarity Tiers</h3>
+              <span className="font-ui text-[10px] uppercase tracking-[0.25em]" style={{ color: 'var(--cf-ember)' }}>
+                Collection Alpha v.1
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
+              {rarities.map((r) => (
+                <div
+                  key={r.name}
+                  className="rounded-lg p-2 sm:p-3 flex flex-col items-center transition-colors"
+                  style={{ background: 'var(--cf-surface3)', border: `1px solid ${r.border}` }}
+                >
+                  <div
+                    className="w-full aspect-[3/4] rounded mb-2 sm:mb-3"
+                    style={{ background: 'var(--cf-bg)', boxShadow: r.glow }}
+                  />
+                  <span
+                    className="font-ui text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em]"
+                    style={{ color: r.color }}
+                  >
+                    {r.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* CLOSING CTA */}
+          <motion.section
+            variants={fadeUp}
+            className="col-span-12 rounded-2xl p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
+            style={{ background: 'var(--cf-ember)' }}
+          >
+            <div
+              aria-hidden
+              className="absolute -right-24 -bottom-24 w-80 h-80 rounded-full pointer-events-none"
+              style={{ background: 'rgba(0,0,0,0.15)' }}
+            />
+            <div className="relative z-10 text-center md:text-left">
+              <h2 className="font-display uppercase text-4xl sm:text-5xl leading-none mb-2 text-white">Ready to Forge?</h2>
+              <p className="font-body text-white/85 text-sm sm:text-base">
+                Connect a Stacks wallet to claim your first pack. No fees. No catch.
+              </p>
+            </div>
+            <button
               onClick={handlePrimary}
               disabled={isLoading}
-              className="font-ui font-semibold text-sm sm:text-base px-8 py-3 sm:py-3.5 rounded-lg disabled:opacity-50"
-              style={{
-                color: '#0a0a14',
-                background: 'linear-gradient(135deg, #e8c66a, #c8a84b)',
-                boxShadow: '0 8px 28px rgba(200,168,75,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
-              }}
+              className="relative z-10 font-ui font-bold uppercase tracking-widest text-xs sm:text-sm px-8 py-3.5 rounded-md transition-colors disabled:opacity-50"
+              style={{ background: '#fff', color: 'var(--cf-ember)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#f3f3f3')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#fff')}
             >
-              {isAuthenticated ? '⚡ Open Your First Pack' : '🔗 Get Started'}
-            </MagneticButton>
-          </div>
-        </Reveal>
-      </section>
+              {isAuthenticated ? '⚡ Open Your First Pack' : 'Start Forging Now'}
+            </button>
+          </motion.section>
+        </motion.div>
+      </div>
     </PageTransition>
   );
 };

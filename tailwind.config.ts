@@ -12,9 +12,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Cinzel Decorative"', 'serif'],
-        ui: ['"Rajdhani"', 'sans-serif'],
-        body: ['"Exo 2"', 'sans-serif'],
+        display: ['"Bebas Neue"', '"Barlow Condensed"', 'sans-serif'],
+        ui: ['"Barlow"', '"Rajdhani"', 'sans-serif'],
+        body: ['"Barlow"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
