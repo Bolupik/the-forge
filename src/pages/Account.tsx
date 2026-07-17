@@ -245,7 +245,7 @@ const Account = () => {
                 Network
               </div>
               <div className="font-display text-base sm:text-lg" style={{ color: 'var(--cf-text)' }}>
-                Stacks Mainnet
+                Stacks Testnet
               </div>
             </div>
           </div>
