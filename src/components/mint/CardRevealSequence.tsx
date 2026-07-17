@@ -112,7 +112,7 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
         <h2
           className="font-display text-lg sm:text-2xl font-black"
           style={{
-            background: 'linear-gradient(160deg, #c8a84b, #fff5c0, #e8c870)',
+            background: 'linear-gradient(160deg, #e0483a, #fff5c0, #e8c870)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
@@ -175,18 +175,18 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
                     className="absolute inset-0"
                     style={{
                       background:
-                        'linear-gradient(115deg, transparent 20%, rgba(200,168,75,0.25) 50%, transparent 80%)',
+                        'linear-gradient(115deg, transparent 20%, rgba(224,72,58,0.25) 50%, transparent 80%)',
                       backgroundSize: '200% 200%',
                       animation: 'shimmer 3s linear infinite',
                     }}
                   />
                   <div className="absolute inset-2 rounded-lg pointer-events-none"
-                    style={{ border: '1px solid rgba(200,168,75,0.2)' }} />
+                    style={{ border: '1px solid rgba(224,72,58,0.2)' }} />
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center mb-2 relative z-10"
                     style={{
-                      background: 'radial-gradient(circle, rgba(200,168,75,0.25), transparent 70%)',
-                      border: '1.5px solid rgba(200,168,75,0.45)',
+                      background: 'radial-gradient(circle, rgba(224,72,58,0.25), transparent 70%)',
+                      border: '1.5px solid rgba(224,72,58,0.45)',
                     }}
                   >
                     <span className="font-display text-xl" style={{ color: 'var(--cf-gold-light)' }}>✦</span>
@@ -235,7 +235,7 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
             style={{
               border: '1px solid var(--cf-border2)',
               color: 'var(--cf-muted2)',
-              background: 'rgba(200,168,75,0.03)',
+              background: 'rgba(224,72,58,0.03)',
             }}
           >
             Skip animation
@@ -298,9 +298,9 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
                 onClick={() => { playClick(); onMintAgain(); }}
                 className="font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95"
                 style={{
-                  background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b)',
+                  background: 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a)',
                   color: 'var(--cf-bg)',
-                  boxShadow: '0 4px 30px rgba(200,168,75,0.35)',
+                  boxShadow: '0 4px 30px rgba(224,72,58,0.35)',
                 }}
               >
                 ⚡ Open Another Pack
@@ -310,9 +310,9 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
                 onClick={() => { playClick(); onDone(); }}
                 className="font-ui text-[0.6rem] uppercase tracking-[0.3em] px-5 py-3 rounded-xl transition-all hover:-translate-y-0.5"
                 style={{
-                  border: '1px solid rgba(200,168,75,0.25)',
+                  border: '1px solid rgba(224,72,58,0.25)',
                   color: 'var(--cf-gold)',
-                  background: 'rgba(200,168,75,0.05)',
+                  background: 'rgba(224,72,58,0.05)',
                 }}
               >
                 View Collection

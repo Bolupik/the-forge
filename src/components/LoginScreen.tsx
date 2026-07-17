@@ -31,20 +31,20 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         <div
           className="absolute inset-0 rounded-full animate-spin-slow"
           style={{
-            border: '1px solid rgba(200,168,75,0.5)',
-            background: 'conic-gradient(transparent 80%, rgba(200,168,75,0.6) 100%)',
+            border: '1px solid rgba(224,72,58,0.5)',
+            background: 'conic-gradient(transparent 80%, rgba(224,72,58,0.6) 100%)',
           }}
         />
         <div
           className="absolute rounded-full animate-spin-reverse"
           style={{
             inset: '10px',
-            border: '1px solid rgba(200,168,75,0.2)',
+            border: '1px solid rgba(224,72,58,0.2)',
           }}
         />
         <span
           className="absolute inset-0 flex items-center justify-center text-3xl"
-          style={{ filter: 'drop-shadow(0 0 14px rgba(200,168,75,0.8))' }}
+          style={{ filter: 'drop-shadow(0 0 14px rgba(224,72,58,0.8))' }}
         >
           ⚡
         </span>
@@ -53,7 +53,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       {/* Logo */}
       <h1
         className="font-display text-5xl md:text-6xl font-black tracking-wide text-gold-gradient"
-        style={{ filter: 'drop-shadow(0 0 40px rgba(200,168,75,0.35))' }}
+        style={{ filter: 'drop-shadow(0 0 40px rgba(224,72,58,0.35))' }}
       >
         CardForge
       </h1>
@@ -81,7 +81,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         <div
           className="absolute inset-0 animate-spin-slow opacity-[0.03] pointer-events-none"
           style={{
-            background: 'conic-gradient(from 0deg, transparent, rgba(200,168,75,0.5), transparent, rgba(120,60,200,0.3), transparent)',
+            background: 'conic-gradient(from 0deg, transparent, rgba(224,72,58,0.5), transparent, rgba(120,60,200,0.3), transparent)',
           }}
         />
 
@@ -110,7 +110,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               e.target.style.borderColor = error ? 'rgba(255,80,80,0.5)' : 'var(--cf-gold)';
               e.target.style.boxShadow = error
                 ? '0 0 20px rgba(255,80,80,0.15)'
-                : '0 0 20px rgba(200,168,75,0.15)';
+                : '0 0 20px rgba(224,72,58,0.15)';
             }}
             onBlur={(e) => {
               e.target.style.borderColor = error ? 'rgba(255,80,80,0.5)' : 'var(--cf-border2)';
@@ -124,18 +124,18 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           type="submit"
           className="relative w-full py-3 font-display text-sm font-bold tracking-wider rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
           style={{
-            background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b, #fff0a0, #c8a84b)',
+            background: 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a, #ffb1a6, #e0483a)',
             backgroundSize: '300% 100%',
             color: 'var(--cf-bg)',
-            boxShadow: '0 4px 20px rgba(200,168,75,0.3)',
+            boxShadow: '0 4px 20px rgba(224,72,58,0.3)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundPosition = '100% 0';
-            e.currentTarget.style.boxShadow = '0 8px 30px rgba(200,168,75,0.45)';
+            e.currentTarget.style.boxShadow = '0 8px 30px rgba(224,72,58,0.45)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundPosition = '0% 0';
-            e.currentTarget.style.boxShadow = '0 4px 20px rgba(200,168,75,0.3)';
+            e.currentTarget.style.boxShadow = '0 4px 20px rgba(224,72,58,0.3)';
           }}
         >
           <span className="relative z-10">Enter the Forge</span>

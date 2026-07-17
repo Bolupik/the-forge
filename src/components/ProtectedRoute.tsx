@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, redirectTo = "/auth" }: ProtectedRouteProps)
         <div
           className="w-12 h-12 rounded-full animate-spin"
           style={{
-            border: "2px solid rgba(200,168,75,0.2)",
+            border: "2px solid rgba(224,72,58,0.2)",
             borderTopColor: "var(--cf-gold)",
           }}
         />

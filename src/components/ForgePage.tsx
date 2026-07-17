@@ -272,9 +272,9 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
           className="relative rounded-xl mb-5 flex flex-col items-center justify-center cursor-pointer transition-all duration-300"
           style={{
             border: `1.5px dashed ${dragOver ? 'var(--cf-gold)' : 'var(--cf-border2)'}`,
-            background: dragOver ? 'rgba(200,168,75,0.04)' : 'transparent',
+            background: dragOver ? 'rgba(224,72,58,0.04)' : 'transparent',
             minHeight: imageUrl ? 'auto' : '120px',
-            boxShadow: dragOver ? 'inset 0 0 20px rgba(200,168,75,0.08)' : 'none',
+            boxShadow: dragOver ? 'inset 0 0 20px rgba(224,72,58,0.08)' : 'none',
           }}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
@@ -314,8 +314,8 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
                     className="relative flex flex-col items-center gap-1 p-2 rounded-lg transition-all duration-200 disabled:cursor-not-allowed"
                     style={{
                       border: `1.5px solid ${active ? 'var(--cf-gold)' : 'var(--cf-border2)'}`,
-                      background: active ? 'rgba(200,168,75,0.08)' : 'transparent',
-                      boxShadow: active ? '0 0 12px rgba(200,168,75,0.2)' : 'none',
+                      background: active ? 'rgba(224,72,58,0.08)' : 'transparent',
+                      boxShadow: active ? '0 0 12px rgba(224,72,58,0.2)' : 'none',
                       opacity: disabled ? 0.5 : 1,
                     }}
                   >
@@ -403,7 +403,7 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
               style={{
                 border: `1px solid ${supply === n ? 'var(--cf-gold)' : 'var(--cf-border2)'}`,
                 color: supply === n ? 'var(--cf-gold)' : 'var(--cf-muted2)',
-                background: supply === n ? 'rgba(200,168,75,0.08)' : 'transparent',
+                background: supply === n ? 'rgba(224,72,58,0.08)' : 'transparent',
               }}
             >
               {n}
@@ -487,7 +487,7 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
             <div className="mt-2 h-[3px] rounded-full overflow-hidden" style={{ background: 'var(--cf-border)' }}>
               <div className="h-full rounded-full transition-all duration-500" style={{
                 width: `${uploadProgress}%`,
-                background: 'linear-gradient(90deg, var(--cf-gold), #f0d060)',
+                background: 'linear-gradient(90deg, var(--cf-gold), #ff8a7a)',
               }} />
             </div>
           )}
@@ -504,9 +504,9 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
               disabled={!name.trim()}
               className="flex-1 py-3 font-display text-sm font-bold tracking-wider rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-40"
               style={{
-                background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b)',
+                background: 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a)',
                 color: 'var(--cf-bg)',
-                boxShadow: '0 4px 20px rgba(200,168,75,0.3)',
+                boxShadow: '0 4px 20px rgba(224,72,58,0.3)',
               }}
             >
               ✓ Save Changes
@@ -525,10 +525,10 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
             disabled={!name.trim() || !imageUrl || supply > remainingSlots || supply < 1}
             className="relative w-full py-3 font-display text-sm font-bold tracking-wider rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
-              background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b, #fff0a0, #c8a84b)',
+              background: 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a, #ffb1a6, #e0483a)',
               backgroundSize: '300% 100%',
               color: 'var(--cf-bg)',
-              boxShadow: '0 4px 20px rgba(200,168,75,0.3)',
+              boxShadow: '0 4px 20px rgba(224,72,58,0.3)',
             }}
           >
             ⚒ Forge Template ({supply} copies)
@@ -541,8 +541,8 @@ const ForgePage = ({ onDataChange }: ForgePageProps) => {
         <div className="flex items-center gap-3 mb-6">
           <h2 className="font-display text-xl text-gold-gradient">Card Templates</h2>
           <span className="font-ui text-[0.6rem] px-2 py-0.5 rounded-full" style={{
-            background: 'rgba(200,168,75,0.1)',
-            border: '1px solid rgba(200,168,75,0.2)',
+            background: 'rgba(224,72,58,0.1)',
+            border: '1px solid rgba(224,72,58,0.2)',
             color: 'var(--cf-gold)',
           }}>{templates.length}</span>
         </div>

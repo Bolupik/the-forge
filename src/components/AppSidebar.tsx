@@ -46,7 +46,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
                   className="absolute -top-px left-[20%] right-[20%] h-[2px] rounded-full"
                   style={{
                     background: 'linear-gradient(90deg, transparent, var(--cf-gold), transparent)',
-                    boxShadow: '0 0 12px rgba(200,168,75,0.5)',
+                    boxShadow: '0 0 12px rgba(224,72,58,0.5)',
                   }}
                   transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 />
@@ -55,7 +55,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
                 className="text-xl transition-all duration-300"
                 style={{
                   transform: active ? 'scale(1.25)' : 'scale(1)',
-                  filter: active ? 'drop-shadow(0 0 8px rgba(200,168,75,0.5))' : 'none',
+                  filter: active ? 'drop-shadow(0 0 8px rgba(224,72,58,0.5))' : 'none',
                 }}
               >
                 {icon}
@@ -70,13 +70,13 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
               {active && (
                 <div
                   className="absolute bottom-1 w-1 h-1 rounded-full"
-                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(200,168,75,0.8)' }}
+                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(224,72,58,0.8)' }}
                 />
               )}
               {page === 'trading' && tradeCount > 0 && (
                 <span
                   className="absolute top-2 right-[28%] w-2 h-2 rounded-full animate-pulse-dot"
-                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 8px rgba(200,168,75,0.6)' }}
+                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 8px rgba(224,72,58,0.6)' }}
                 />
               )}
             </button>
@@ -106,7 +106,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
         {/* Gold accent line */}
         <div
           className="absolute top-0 right-0 w-px h-full pointer-events-none"
-          style={{ background: 'linear-gradient(180deg, transparent 10%, rgba(200,168,75,0.15) 50%, transparent 90%)' }}
+          style={{ background: 'linear-gradient(180deg, transparent 10%, rgba(224,72,58,0.15) 50%, transparent 90%)' }}
         />
 
         {/* Logo */}
@@ -116,7 +116,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
         >
           <button
             onClick={() => onNavigate('gallery')}
-            className="font-display font-bold text-gold-gradient transition-all duration-500 hover:drop-shadow-[0_0_20px_rgba(200,168,75,0.5)] active:scale-95 truncate"
+            className="font-display font-bold text-gold-gradient transition-all duration-500 hover:drop-shadow-[0_0_20px_rgba(224,72,58,0.5)] active:scale-95 truncate"
             style={{ fontSize: collapsed ? '1rem' : '1.15rem' }}
           >
             {collapsed ? 'CF' : 'CardForge'}
@@ -152,8 +152,8 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
                       layoutId="sidebar-active-bg"
                       className="absolute inset-0 rounded-xl"
                       style={{
-                        background: 'rgba(200,168,75,0.08)',
-                        border: '1px solid rgba(200,168,75,0.15)',
+                        background: 'rgba(224,72,58,0.08)',
+                        border: '1px solid rgba(224,72,58,0.15)',
                       }}
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
@@ -165,7 +165,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
                       className="absolute left-0 top-[15%] bottom-[15%] w-[2.5px] rounded-full"
                       style={{
                         background: 'linear-gradient(180deg, var(--cf-gold), var(--cf-gold2))',
-                        boxShadow: '0 0 8px rgba(200,168,75,0.5)',
+                        boxShadow: '0 0 8px rgba(224,72,58,0.5)',
                       }}
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
@@ -174,7 +174,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
                     className="relative text-lg transition-all duration-300"
                     style={{
                       transform: active ? 'scale(1.2)' : hovered ? 'scale(1.1)' : 'scale(1)',
-                      filter: active ? 'drop-shadow(0 0 6px rgba(200,168,75,0.4))' : 'none',
+                      filter: active ? 'drop-shadow(0 0 6px rgba(224,72,58,0.4))' : 'none',
                     }}
                   >
                     {icon}
@@ -185,7 +185,7 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
                   {page === 'trading' && tradeCount > 0 && (
                     <span
                       className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse-dot"
-                      style={{ background: 'var(--cf-gold)', boxShadow: '0 0 8px rgba(200,168,75,0.6)' }}
+                      style={{ background: 'var(--cf-gold)', boxShadow: '0 0 8px rgba(224,72,58,0.6)' }}
                     />
                   )}
                 </button>
@@ -197,13 +197,13 @@ const AppSidebar = ({ activePage, onNavigate, tradeCount }: AppSidebarProps) => 
         {/* Wallet button */}
         <div className="px-2 pb-3">
           <button
-            className="w-full flex items-center gap-2 rounded-xl font-ui text-xs font-semibold transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(200,168,75,0.15)] active:scale-95 overflow-hidden"
+            className="w-full flex items-center gap-2 rounded-xl font-ui text-xs font-semibold transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(224,72,58,0.15)] active:scale-95 overflow-hidden"
             style={{
               padding: collapsed ? '12px 0' : '12px 14px',
               justifyContent: collapsed ? 'center' : 'flex-start',
               color: 'var(--cf-gold)',
-              border: '1px solid rgba(200,168,75,0.2)',
-              background: 'linear-gradient(135deg, rgba(200,168,75,0.04), rgba(200,168,75,0.08))',
+              border: '1px solid rgba(224,72,58,0.2)',
+              background: 'linear-gradient(135deg, rgba(224,72,58,0.04), rgba(224,72,58,0.08))',
             }}
             onClick={() => alert('Wallet connect coming soon!')}
           >

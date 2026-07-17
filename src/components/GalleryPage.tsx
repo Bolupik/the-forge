@@ -22,8 +22,8 @@ const FILTER_ACTIVE_STYLES: Record<string, { bg: string; text: string; shadow: s
   legendary: { bg: 'rgba(230,160,20,0.09)', text: '#ffe860', shadow: '0 0 12px rgba(240,180,20,0.2)' },
   epic: { bg: 'rgba(160,60,220,0.09)', text: '#d870ff', shadow: '0 0 12px rgba(160,60,240,0.2)' },
   rare: { bg: 'rgba(60,130,220,0.09)', text: '#88c4ff', shadow: '0 0 12px rgba(60,140,255,0.2)' },
-  all: { bg: 'rgba(200,168,75,0.09)', text: 'var(--cf-gold)', shadow: '0 0 12px rgba(200,168,75,0.2)' },
-  common: { bg: 'rgba(200,168,75,0.09)', text: 'var(--cf-gold)', shadow: '0 0 12px rgba(200,168,75,0.2)' },
+  all: { bg: 'rgba(224,72,58,0.09)', text: 'var(--cf-gold)', shadow: '0 0 12px rgba(224,72,58,0.2)' },
+  common: { bg: 'rgba(224,72,58,0.09)', text: 'var(--cf-gold)', shadow: '0 0 12px rgba(224,72,58,0.2)' },
 };
 
 const EMPTY_MESSAGES: Record<string, { emoji: string; title: string; sub: string }> = {
@@ -62,7 +62,7 @@ const GalleryPage = ({ cards, trades }: GalleryPageProps) => {
               top: '50%', left: '50%', transform: 'translate(-50%, -58%)',
               fontSize: 'clamp(4rem, 13vw, 13rem)',
               color: 'transparent',
-              WebkitTextStroke: '1px rgba(200,168,75,0.055)',
+              WebkitTextStroke: '1px rgba(224,72,58,0.055)',
             }}
           >
             FORGE
@@ -76,7 +76,7 @@ const GalleryPage = ({ cards, trades }: GalleryPageProps) => {
             <motion.div
               variants={fadeUp}
               className="inline-flex items-center gap-2 font-ui text-[0.6rem] font-semibold uppercase tracking-[0.45em] px-5 py-1.5 rounded-[20px] mb-6"
-              style={{ border: '1px solid rgba(200,168,75,0.2)', color: 'var(--cf-gold)' }}
+              style={{ border: '1px solid rgba(224,72,58,0.2)', color: 'var(--cf-gold)' }}
             >
               <span>◆</span>
               Bitcoin-Secured · Stacks Network
@@ -88,10 +88,10 @@ const GalleryPage = ({ cards, trades }: GalleryPageProps) => {
               className="font-display font-black mb-6"
               style={{
                 fontSize: 'clamp(2.4rem, 5vw, 5rem)',
-                background: 'linear-gradient(160deg, #c8a84b, #fff5c0, #e8c870, #c8a84b)',
+                background: 'linear-gradient(160deg, #e0483a, #fff5c0, #e8c870, #e0483a)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 30px rgba(200,168,75,0.3))',
+                filter: 'drop-shadow(0 0 30px rgba(224,72,58,0.3))',
               }}
             >
               Genesis Collection
@@ -119,7 +119,7 @@ const GalleryPage = ({ cards, trades }: GalleryPageProps) => {
           style={{
             borderTop: '1px solid var(--cf-border)',
             borderBottom: '1px solid var(--cf-border)',
-            background: 'linear-gradient(90deg, transparent, rgba(200,168,75,0.025), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(224,72,58,0.025), transparent)',
           }}
         >
           {[

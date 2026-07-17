@@ -32,7 +32,7 @@ const PackGrid = ({ onPackSelected, packsRemaining, totalPacks, disabled }: Pack
       <div className="text-center mb-6">
         <div
           className="inline-flex items-center gap-2 font-ui text-[0.5rem] font-bold uppercase tracking-[0.4em] px-4 py-1.5 rounded-full mb-4"
-          style={{ border: '1px solid rgba(200,168,75,0.2)', color: 'var(--cf-gold)' }}
+          style={{ border: '1px solid rgba(224,72,58,0.2)', color: 'var(--cf-gold)' }}
         >
           <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ background: '#4ade80' }} />
           Choose Your Pack
@@ -41,10 +41,10 @@ const PackGrid = ({ onPackSelected, packsRemaining, totalPacks, disabled }: Pack
           className="font-display font-black mb-2"
           style={{
             fontSize: 'clamp(1.4rem, 4.5vw, 2.5rem)',
-            background: 'linear-gradient(160deg, #c8a84b, #fff5c0, #e8c870, #c8a84b)',
+            background: 'linear-gradient(160deg, #e0483a, #fff5c0, #e8c870, #e0483a)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 30px rgba(200,168,75,0.25))',
+            filter: 'drop-shadow(0 0 30px rgba(224,72,58,0.25))',
           }}
         >
           Pick One Pack
@@ -82,9 +82,9 @@ const PackGrid = ({ onPackSelected, packsRemaining, totalPacks, disabled }: Pack
                 background: 'linear-gradient(160deg, #1a1530, #0d0a1f 60%, #1a1530)',
                 border: `2px solid ${isHovered ? 'var(--cf-gold)' : 'var(--cf-border2)'}`,
                 boxShadow: isSelected
-                  ? '0 0 80px rgba(200,168,75,0.7), 0 0 30px rgba(255,245,192,0.4)'
+                  ? '0 0 80px rgba(224,72,58,0.7), 0 0 30px rgba(255,245,192,0.4)'
                   : isHovered
-                    ? '0 18px 50px rgba(200,168,75,0.35), 0 0 24px rgba(200,168,75,0.25)'
+                    ? '0 18px 50px rgba(224,72,58,0.35), 0 0 24px rgba(224,72,58,0.25)'
                     : '0 6px 20px rgba(0,0,0,0.5)',
                 transform: isSelected
                   ? 'translateZ(80px) scale(1.18) rotateY(0deg)'
@@ -104,7 +104,7 @@ const PackGrid = ({ onPackSelected, packsRemaining, totalPacks, disabled }: Pack
                 className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
-                    'linear-gradient(115deg, transparent 20%, rgba(200,168,75,0.18) 45%, rgba(255,245,192,0.25) 50%, rgba(200,168,75,0.18) 55%, transparent 80%)',
+                    'linear-gradient(115deg, transparent 20%, rgba(224,72,58,0.18) 45%, rgba(255,245,192,0.25) 50%, rgba(224,72,58,0.18) 55%, transparent 80%)',
                   backgroundSize: '250% 250%',
                   animation: isHovered || isSelected ? 'shimmer 2.2s linear infinite' : 'shimmer 8s linear infinite',
                   opacity: isHovered || isSelected ? 0.9 : 0.35,
@@ -115,22 +115,22 @@ const PackGrid = ({ onPackSelected, packsRemaining, totalPacks, disabled }: Pack
 
               {/* Decorative frame */}
               <div className="absolute inset-2 rounded-lg pointer-events-none"
-                style={{ border: '1px solid rgba(200,168,75,0.2)' }} />
+                style={{ border: '1px solid rgba(224,72,58,0.2)' }} />
 
               {/* Center seal */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                 <div
                   className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
                   style={{
-                    background: 'radial-gradient(circle, rgba(200,168,75,0.25), transparent 70%)',
-                    border: '1.5px solid rgba(200,168,75,0.45)',
+                    background: 'radial-gradient(circle, rgba(224,72,58,0.25), transparent 70%)',
+                    border: '1.5px solid rgba(224,72,58,0.45)',
                   }}
                 >
                   <span
                     className="font-display text-2xl sm:text-3xl"
                     style={{
                       color: 'var(--cf-gold-light)',
-                      filter: `drop-shadow(0 0 10px rgba(200,168,75,${isHovered ? 0.9 : 0.5}))`,
+                      filter: `drop-shadow(0 0 10px rgba(224,72,58,${isHovered ? 0.9 : 0.5}))`,
                       animation: isHovered ? 'float-gentle 2s ease-in-out infinite' : 'none',
                     }}
                   >
