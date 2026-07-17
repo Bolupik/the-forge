@@ -26,12 +26,12 @@ const NavBar = ({ activePage, onNavigate, onLogout, tradeCount }: NavBarProps) =
     >
       <div
         className="absolute bottom-0 left-0 w-full h-px pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(200,168,75,0.18), transparent)' }}
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(224,72,58,0.18), transparent)' }}
       />
 
       <button
         onClick={() => onNavigate('gallery')}
-        className="font-display text-lg font-bold text-gold-gradient transition-all duration-300 hover:drop-shadow-[0_0_16px_rgba(200,168,75,0.5)] shrink-0"
+        className="font-display text-lg font-bold text-gold-gradient transition-all duration-300 hover:drop-shadow-[0_0_16px_rgba(224,72,58,0.5)] shrink-0"
       >
         CardForge
         <span className="font-ui text-[0.5rem] ml-1.5 px-1.5 py-0.5 rounded text-red-400 border border-red-400/30 align-middle">ADMIN</span>
@@ -47,8 +47,8 @@ const NavBar = ({ activePage, onNavigate, onLogout, tradeCount }: NavBarProps) =
               className="relative font-ui text-xs md:text-sm font-semibold px-3 md:px-5 py-2 rounded-md transition-all duration-200"
               style={{
                 color: active ? 'var(--cf-gold)' : 'var(--cf-muted2)',
-                background: active ? 'rgba(200,168,75,0.07)' : 'transparent',
-                border: active ? '1px solid rgba(200,168,75,0.22)' : '1px solid transparent',
+                background: active ? 'rgba(224,72,58,0.07)' : 'transparent',
+                border: active ? '1px solid rgba(224,72,58,0.22)' : '1px solid transparent',
               }}
               onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = 'var(--cf-text)'; }}
               onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = 'var(--cf-muted2)'; }}
@@ -65,7 +65,7 @@ const NavBar = ({ activePage, onNavigate, onLogout, tradeCount }: NavBarProps) =
               {page === 'trading' && tradeCount > 0 && (
                 <span
                   className="absolute top-[5px] right-[7px] w-1.5 h-1.5 rounded-full animate-pulse-dot"
-                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(200,168,75,0.6)' }}
+                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(224,72,58,0.6)' }}
                 />
               )}
             </button>

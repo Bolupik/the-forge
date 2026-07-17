@@ -69,11 +69,11 @@ const TradingPage = ({ cards, trades, onDataChange }: TradingPageProps) => {
       <div className="text-center mb-12">
         <span
           className="inline-block font-ui text-[0.58rem] uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-5 animate-pulse"
-          style={{ border: '1px solid rgba(200,168,75,0.25)', color: 'var(--cf-gold)', background: 'rgba(200,168,75,0.06)' }}
+          style={{ border: '1px solid rgba(224,72,58,0.25)', color: 'var(--cf-gold)', background: 'rgba(224,72,58,0.06)' }}
         >
           Coming Soon
         </span>
-        <h1 className="font-display text-3xl md:text-4xl font-black text-gold-gradient mb-3" style={{ filter: 'drop-shadow(0 0 30px rgba(200,168,75,0.25))' }}>
+        <h1 className="font-display text-3xl md:text-4xl font-black text-gold-gradient mb-3" style={{ filter: 'drop-shadow(0 0 30px rgba(224,72,58,0.25))' }}>
           Card Trading Exchange
         </h1>
         <p className="font-body text-sm mx-auto max-w-[400px]" style={{ color: 'var(--cf-muted2)', lineHeight: 1.8 }}>
@@ -135,9 +135,9 @@ const TradingPage = ({ cards, trades, onDataChange }: TradingPageProps) => {
             onClick={createListing}
             className="font-display text-xs font-bold px-5 py-2 rounded-lg transition-all duration-200 hover:-translate-y-0.5 whitespace-nowrap"
             style={{
-              background: 'linear-gradient(135deg, #a07828, #f0d060, #c8a84b)',
+              background: 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a)',
               color: 'var(--cf-bg)',
-              boxShadow: '0 4px 15px rgba(200,168,75,0.25)',
+              boxShadow: '0 4px 15px rgba(224,72,58,0.25)',
             }}
           >
             + List
@@ -214,7 +214,7 @@ const TradingPage = ({ cards, trades, onDataChange }: TradingPageProps) => {
               </thead>
               <tbody>
                 {trades.map((t) => (
-                  <tr key={t.id} className="transition-colors hover:bg-[rgba(200,168,75,0.02)]" style={{ borderBottom: '1px solid var(--cf-border)' }}>
+                  <tr key={t.id} className="transition-colors hover:bg-[rgba(224,72,58,0.02)]" style={{ borderBottom: '1px solid var(--cf-border)' }}>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         {t.imageUrl && <img src={t.imageUrl} alt="" className="w-[30px] h-[42px] object-cover rounded" />}

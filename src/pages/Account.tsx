@@ -175,8 +175,8 @@ const Account = () => {
                 className="font-ui text-xs px-3 py-2 rounded-lg border transition-all duration-300 hover:-translate-y-0.5 active:scale-95 disabled:opacity-40"
                 style={{
                   color: copied ? '#4ade80' : 'var(--cf-gold)',
-                  borderColor: copied ? 'rgba(74,222,128,0.4)' : 'rgba(200,168,75,0.3)',
-                  background: copied ? 'rgba(74,222,128,0.08)' : 'rgba(200,168,75,0.06)',
+                  borderColor: copied ? 'rgba(74,222,128,0.4)' : 'rgba(224,72,58,0.3)',
+                  background: copied ? 'rgba(74,222,128,0.08)' : 'rgba(224,72,58,0.06)',
                 }}
               >
                 {copied ? '✓ Copied' : '📋 Copy Address'}
@@ -245,7 +245,7 @@ const Account = () => {
                 Network
               </div>
               <div className="font-display text-base sm:text-lg" style={{ color: 'var(--cf-text)' }}>
-                Stacks Mainnet
+                Stacks Testnet
               </div>
             </div>
           </div>
@@ -295,8 +295,8 @@ const Account = () => {
               className="font-ui font-semibold text-sm px-5 py-2.5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
               style={{
                 color: '#0a0a14',
-                background: 'linear-gradient(135deg, #e8c66a, #c8a84b)',
-                boxShadow: '0 6px 20px rgba(200,168,75,0.3)',
+                background: 'linear-gradient(135deg, #ff6a5a, #e0483a)',
+                boxShadow: '0 6px 20px rgba(224,72,58,0.3)',
               }}
             >
               ⚡ Open a Pack

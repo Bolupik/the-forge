@@ -23,11 +23,11 @@ const PublicTradingPage = ({ cards, trades }: PublicTradingPageProps) => {
       <div className="text-center mb-12">
         <span
           className="inline-block font-ui text-[0.58rem] uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-5 animate-pulse"
-          style={{ border: '1px solid rgba(200,168,75,0.25)', color: 'var(--cf-gold)', background: 'rgba(200,168,75,0.06)' }}
+          style={{ border: '1px solid rgba(224,72,58,0.25)', color: 'var(--cf-gold)', background: 'rgba(224,72,58,0.06)' }}
         >
           Coming Soon
         </span>
-        <h1 className="font-display text-3xl md:text-4xl font-black text-gold-gradient mb-3" style={{ filter: 'drop-shadow(0 0 30px rgba(200,168,75,0.25))' }}>
+        <h1 className="font-display text-3xl md:text-4xl font-black text-gold-gradient mb-3" style={{ filter: 'drop-shadow(0 0 30px rgba(224,72,58,0.25))' }}>
           Card Trading Exchange
         </h1>
         <p className="font-body text-sm mx-auto max-w-[400px]" style={{ color: 'var(--cf-muted2)', lineHeight: 1.8 }}>
@@ -90,9 +90,9 @@ const PublicTradingPage = ({ cards, trades }: PublicTradingPageProps) => {
                   <button
                     className="font-ui text-[0.6rem] px-3 py-1.5 rounded-lg shrink-0 transition-colors"
                     style={{
-                      border: '1px solid rgba(200,168,75,0.3)',
+                      border: '1px solid rgba(224,72,58,0.3)',
                       color: 'var(--cf-gold)',
-                      background: 'rgba(200,168,75,0.06)',
+                      background: 'rgba(224,72,58,0.06)',
                     }}
                     onClick={() => alert('Connect your wallet to make offers!')}
                   >
@@ -113,7 +113,7 @@ const PublicTradingPage = ({ cards, trades }: PublicTradingPageProps) => {
               </thead>
               <tbody>
                 {trades.filter(t => t.status === 'active').map((t) => (
-                  <tr key={t.id} className="transition-colors hover:bg-[rgba(200,168,75,0.02)]" style={{ borderBottom: '1px solid var(--cf-border)' }}>
+                  <tr key={t.id} className="transition-colors hover:bg-[rgba(224,72,58,0.02)]" style={{ borderBottom: '1px solid var(--cf-border)' }}>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         {t.imageUrl && <img src={t.imageUrl} alt="" className="w-[30px] h-[42px] object-cover rounded" />}
@@ -133,7 +133,7 @@ const PublicTradingPage = ({ cards, trades }: PublicTradingPageProps) => {
                     <td className="py-3 px-4">
                       <button
                         className="font-ui text-[0.55rem] px-3 py-1 rounded transition-colors"
-                        style={{ border: '1px solid rgba(200,168,75,0.3)', color: 'var(--cf-gold)' }}
+                        style={{ border: '1px solid rgba(224,72,58,0.3)', color: 'var(--cf-gold)' }}
                         onClick={() => alert('Connect your wallet to make offers!')}
                       >
                         Offer

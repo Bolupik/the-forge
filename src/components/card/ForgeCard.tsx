@@ -218,7 +218,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
                 className="absolute top-2 right-2 font-ui text-[0.45rem] font-bold tracking-wider px-1.5 py-0.5 rounded-sm"
                 style={{
                   background: 'rgba(5,5,14,0.78)',
-                  border: '1px solid rgba(200,168,75,0.5)',
+                  border: '1px solid rgba(224,72,58,0.5)',
                   color: 'var(--cf-gold)',
                   backdropFilter: 'blur(6px)',
                 }}

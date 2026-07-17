@@ -49,7 +49,7 @@ const ParticleField = () => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = p.gold
-          ? `rgba(200,168,75,${alpha})`
+          ? `rgba(224,72,58,${alpha})`
           : `rgba(140,80,200,${alpha})`;
         ctx.fill();
       }

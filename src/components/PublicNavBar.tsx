@@ -44,13 +44,13 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
     >
       <div
         className="absolute bottom-0 left-0 w-full h-px pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(200,168,75,0.18), transparent)' }}
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(224,72,58,0.18), transparent)' }}
       />
 
       {/* Logo */}
       <button
         onClick={() => onNavigate('gallery')}
-        className="font-display text-base sm:text-lg font-bold text-gold-gradient transition-all duration-300 hover:drop-shadow-[0_0_16px_rgba(200,168,75,0.5)] shrink-0"
+        className="font-display text-base sm:text-lg font-bold text-gold-gradient transition-all duration-300 hover:drop-shadow-[0_0_16px_rgba(224,72,58,0.5)] shrink-0"
       >
         <span className="hidden sm:inline">CardForge</span>
         <span className="sm:hidden">CF</span>
@@ -67,8 +67,8 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
               className="relative font-ui text-xs sm:text-sm font-semibold px-2.5 sm:px-4 md:px-5 py-1.5 sm:py-2 rounded-md transition-all duration-300"
               style={{
                 color: active ? 'var(--cf-gold)' : 'var(--cf-muted2)',
-                background: active ? 'rgba(200,168,75,0.07)' : 'transparent',
-                border: active ? '1px solid rgba(200,168,75,0.22)' : '1px solid transparent',
+                background: active ? 'rgba(224,72,58,0.07)' : 'transparent',
+                border: active ? '1px solid rgba(224,72,58,0.22)' : '1px solid transparent',
                 transform: active ? 'scale(1.05)' : 'scale(1)',
               }}
               onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = 'var(--cf-text)'; }}
@@ -85,7 +85,7 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
               {page === 'trading' && tradeCount > 0 && (
                 <span
                   className="absolute top-[3px] right-[5px] sm:top-[5px] sm:right-[7px] w-1.5 h-1.5 rounded-full animate-pulse-dot"
-                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(200,168,75,0.6)' }}
+                  style={{ background: 'var(--cf-gold)', boxShadow: '0 0 6px rgba(224,72,58,0.6)' }}
                 />
               )}
             </button>
@@ -101,9 +101,9 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
             className="font-ui text-[0.6rem] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5"
             style={{
               color: 'var(--cf-gold)',
-              borderColor: 'rgba(200,168,75,0.3)',
-              background: 'rgba(200,168,75,0.06)',
-              boxShadow: '0 2px 10px rgba(200,168,75,0.1)',
+              borderColor: 'rgba(224,72,58,0.3)',
+              background: 'rgba(224,72,58,0.06)',
+              boxShadow: '0 2px 10px rgba(224,72,58,0.1)',
             }}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
@@ -181,9 +181,9 @@ const PublicNavBar = ({ activePage, onNavigate, tradeCount }: PublicNavBarProps)
           className="font-ui text-[0.6rem] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border transition-all duration-300 shrink-0 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
           style={{
             color: 'var(--cf-gold)',
-            borderColor: 'rgba(200,168,75,0.3)',
-            background: 'rgba(200,168,75,0.06)',
-            boxShadow: '0 2px 10px rgba(200,168,75,0.1)',
+            borderColor: 'rgba(224,72,58,0.3)',
+            background: 'rgba(224,72,58,0.06)',
+            boxShadow: '0 2px 10px rgba(224,72,58,0.1)',
           }}
           onClick={signIn}
         >

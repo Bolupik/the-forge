@@ -31,7 +31,7 @@ const PackOpenAnimation = ({ packIndex, onComplete }: PackOpenAnimationProps) =>
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none animate-card-enter"
-      style={{ background: 'radial-gradient(ellipse at center, rgba(200,168,75,0.08), rgba(5,5,14,0.85) 60%)', backdropFilter: 'blur(8px)' }}>
+      style={{ background: 'radial-gradient(ellipse at center, rgba(224,72,58,0.08), rgba(5,5,14,0.85) 60%)', backdropFilter: 'blur(8px)' }}>
       <div className="relative" style={{ perspective: '1000px' }}>
         {/* Pack body — splits into top + bottom halves on tear */}
         <div
@@ -41,7 +41,7 @@ const PackOpenAnimation = ({ packIndex, onComplete }: PackOpenAnimationProps) =>
             transform: stage === 'shake' ? 'scale(1.15)' : 'scale(1)',
             animation: stage === 'shake' ? 'shake 0.18s ease-in-out infinite' : 'none',
             transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            filter: `drop-shadow(0 0 ${stage === 'shake' || stage === 'tear' ? '60px' : '20px'} rgba(200,168,75,${stage === 'shake' ? 0.7 : 0.3}))`,
+            filter: `drop-shadow(0 0 ${stage === 'shake' || stage === 'tear' ? '60px' : '20px'} rgba(224,72,58,${stage === 'shake' ? 0.7 : 0.3}))`,
           }}
         >
           {/* Top half */}
@@ -61,7 +61,7 @@ const PackOpenAnimation = ({ packIndex, onComplete }: PackOpenAnimationProps) =>
               className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(115deg, transparent 20%, rgba(200,168,75,0.3) 50%, transparent 80%)',
+                  'linear-gradient(115deg, transparent 20%, rgba(224,72,58,0.3) 50%, transparent 80%)',
                 backgroundSize: '200% 200%',
                 animation: 'shimmer 1.5s linear infinite',
               }}
@@ -100,7 +100,7 @@ const PackOpenAnimation = ({ packIndex, onComplete }: PackOpenAnimationProps) =>
               <div
                 className="w-32 h-32 rounded-full"
                 style={{
-                  background: 'radial-gradient(circle, rgba(255,245,192,0.9), rgba(200,168,75,0.4) 40%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(255,245,192,0.9), rgba(224,72,58,0.4) 40%, transparent 70%)',
                   filter: 'blur(4px)',
                   animation: 'pulse-burst 1.2s ease-out infinite',
                 }}
@@ -119,7 +119,7 @@ const PackOpenAnimation = ({ packIndex, onComplete }: PackOpenAnimationProps) =>
                     key={i}
                     className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full"
                     style={{
-                      background: i % 3 === 0 ? '#fff5c0' : i % 3 === 1 ? '#c8a84b' : '#e8c870',
+                      background: i % 3 === 0 ? '#fff5c0' : i % 3 === 1 ? '#e0483a' : '#e8c870',
                       boxShadow: '0 0 8px currentColor',
                       color: '#fff5c0',
                       transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`,
