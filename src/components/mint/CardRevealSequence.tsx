@@ -3,7 +3,7 @@ import { NFTCard, Rarity } from '@/lib/cardforge';
 import { playCardFlip, playRareReveal, playSuccess, playClick } from '@/lib/sounds';
 import NFTCardComponent from '@/components/NFTCard';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
-import { mintCardOnChain, getContractConfig, explorerTxUrl } from '@/lib/stacksMint';
+import { mintCardOnChain, getContractConfig, explorerTxUrl, getMintPriceDisplay } from '@/lib/stacksMint';
 
 interface CardRevealSequenceProps {
   cards: NFTCard[];
@@ -245,21 +245,26 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
         {showSummary && (
           <div className="flex flex-col items-center gap-3 w-full max-w-md">
             {contractCfg && userData?.address && mintState !== 'done' && (
-              <button
-                type="button"
-                onClick={handleMintToWallet}
-                disabled={mintState === 'minting'}
-                className="w-full font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-wait"
-                style={{
-                  background: 'linear-gradient(135deg, #5b8def, #8b5cf6, #ec4899)',
-                  color: '#fff',
-                  boxShadow: '0 4px 30px rgba(91,141,239,0.35)',
-                }}
-              >
-                {mintState === 'minting'
-                  ? `Signing ${mintProgress}/${cards.length}…`
-                  : `🪪 Mint ${cards.length} to my Stacks wallet`}
-              </button>
+              <div className="w-full flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleMintToWallet}
+                  disabled={mintState === 'minting'}
+                  className="w-full font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-wait"
+                  style={{
+                    background: 'linear-gradient(135deg, #5b8def, #8b5cf6, #ec4899)',
+                    color: '#fff',
+                    boxShadow: '0 4px 30px rgba(91,141,239,0.35)',
+                  }}
+                >
+                  {mintState === 'minting'
+                    ? `Signing ${mintProgress}/${cards.length}…`
+                    : `🪪 Mint ${cards.length} to my Stacks wallet`}
+                </button>
+                <span className="font-ui text-[0.55rem] uppercase tracking-[0.2em]" style={{ color: 'var(--cf-muted)' }}>
+                  {getMintPriceDisplay(contractCfg.network)} per card · {cards.length * 5} STX total
+                </span>
+              </div>
             )}
 
             {mintState === 'done' && contractCfg && (
