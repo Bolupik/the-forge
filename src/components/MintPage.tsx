@@ -7,6 +7,7 @@ import PackGrid from './mint/PackGrid';
 import PackOpenAnimation from './mint/PackOpenAnimation';
 import CardRevealSequence from './mint/CardRevealSequence';
 import NetworkSwitch from './NetworkSwitch';
+import { getMintPriceDisplay, getSelectedNetwork } from '@/lib/stacksMint';
 
 
 type Phase = 'pick' | 'opening' | 'revealing';
@@ -130,7 +131,7 @@ const MintPage = () => {
           { label: 'Packs Left', value: `${packsRemaining.toLocaleString()} / ${stats.totalPacks.toLocaleString()}` },
           { label: 'Cards / Pack', value: stats.cardsPerPack.toString() },
           { label: 'Total Minted', value: stats.totalMinted.toLocaleString() },
-          { label: 'Price', value: 'Free' },
+          { label: 'Mint Price', value: `${getMintPriceDisplay(getSelectedNetwork())} / card` },
         ].map((row) => (
           <div
             key={row.label}
