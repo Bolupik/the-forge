@@ -244,13 +244,13 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
 
         {showSummary && (
           <div className="flex flex-col items-center gap-3 w-full max-w-md">
-            {contractCfg && userData?.address && mintState !== 'done' && (
+            {mintState !== 'done' && (
               <div className="w-full flex flex-col items-center gap-1">
                 <button
                   type="button"
                   onClick={handleMintToWallet}
-                  disabled={mintState === 'minting'}
-                  className="w-full font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-wait"
+                  disabled={mintState === 'minting' || !contractCfg || !userData?.address}
+                  className="w-full font-display text-sm font-bold py-3 px-6 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
                     background: 'linear-gradient(135deg, #5b8def, #8b5cf6, #ec4899)',
                     color: '#fff',
@@ -259,11 +259,22 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
                 >
                   {mintState === 'minting'
                     ? `Signing ${mintProgress}/${cards.length}…`
-                    : `🪪 Mint ${cards.length} to my Stacks wallet`}
+                    : !userData?.address
+                      ? '🔌 Connect your Stacks wallet first'
+                      : !contractCfg
+                        ? '⚠ Set contract address to mint'
+                        : `🪪 Mint ${cards.length} to my Stacks wallet`}
                 </button>
-                <span className="font-ui text-[0.55rem] uppercase tracking-[0.2em]" style={{ color: 'var(--cf-muted)' }}>
-                  {getMintPriceDisplay(contractCfg.network)} per card · {cards.length * 5} STX total
-                </span>
+                {contractCfg && userData?.address && (
+                  <span className="font-ui text-[0.55rem] uppercase tracking-[0.2em]" style={{ color: 'var(--cf-muted)' }}>
+                    {getMintPriceDisplay(contractCfg.network)} per card · {cards.length * 5} STX total
+                  </span>
+                )}
+                {!contractCfg && (
+                  <span className="font-body text-[0.6rem] text-center px-2" style={{ color: '#f87171' }}>
+                    Scroll up on the Mint page and click "Set contract" in the chain bar to paste your deployed testnet contract address.
+                  </span>
+                )}
               </div>
             )}
 
@@ -290,12 +301,6 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
               </div>
             )}
 
-            {!contractCfg && (
-              <p className="font-body text-[0.6rem] text-center" style={{ color: 'var(--cf-muted)' }}>
-                Set the contract address for the selected network in env
-                (<code>VITE_STACKS_CONTRACT_ADDRESS_TESTNET</code> / <code>VITE_STACKS_CONTRACT_ADDRESS_MAINNET</code>).
-              </p>
-            )}
 
             <div className="flex flex-col sm:flex-row gap-3 items-center">
               <button
