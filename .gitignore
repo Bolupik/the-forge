@@ -27,5 +27,7 @@ dist-ssr
 settings/Testnet.toml
 settings/Mainnet.toml
 
-# NOTE: .env is intentionally tracked. Lovable builds from this repo and needs
-# it; it holds only publishable values (VITE_* vars ship in the JS bundle anyway).
+# Environment files contain app configuration and should not be committed.
+.env
+.env.local
+.env.*.local
