@@ -7,11 +7,13 @@ export type StacksNetwork = 'mainnet' | 'testnet';
 
 const NETWORK_LS_KEY = 'cf_stacks_network_v1';
 
+const CONTRACT_LS_KEY = (n: StacksNetwork) => `cf_stacks_contract_${n}_v1`;
+const CONTRACT_NAME_LS_KEY = 'cf_stacks_contract_name_v1';
+
 export const getSelectedNetwork = (): StacksNetwork => {
   if (typeof window === 'undefined') return 'testnet';
   const stored = localStorage.getItem(NETWORK_LS_KEY);
   if (stored === 'mainnet' || stored === 'testnet') return stored;
-  // Fall back to env for the very first load.
   const env = (import.meta.env.VITE_STACKS_NETWORK as string | undefined) ?? 'testnet';
   return env === 'mainnet' ? 'mainnet' : 'testnet';
 };
@@ -27,19 +29,43 @@ export interface ContractConfig {
   network: StacksNetwork;
 }
 
+export const getContractName = (): string => {
+  if (typeof window !== 'undefined') {
+    const ls = localStorage.getItem(CONTRACT_NAME_LS_KEY);
+    if (ls && ls.trim()) return ls.trim();
+  }
+  return (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft';
+};
+
+export const setContractName = (name: string) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CONTRACT_NAME_LS_KEY, name.trim());
+};
+
+export const setContractAddress = (network: StacksNetwork, address: string) => {
+  if (typeof window === 'undefined') return;
+  const trimmed = address.trim();
+  if (trimmed) localStorage.setItem(CONTRACT_LS_KEY(network), trimmed);
+  else localStorage.removeItem(CONTRACT_LS_KEY(network));
+};
+
 export const getContractConfig = (): ContractConfig | null => {
   const network = getSelectedNetwork();
-  const name = (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft';
+  const name = getContractName();
 
-  // 1. Legacy single-address override (highest priority)
-  const legacyAddress = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS as string | undefined;
-  // 2. Per-network address
-  const networkAddress =
-    network === 'mainnet'
-      ? (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_MAINNET as string | undefined)
-      : (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_TESTNET as string | undefined);
+  // 1. LocalStorage override (runtime-editable in UI)
+  const lsAddress = typeof window !== 'undefined'
+    ? localStorage.getItem(CONTRACT_LS_KEY(network))?.trim()
+    : undefined;
+  // 2. Legacy single-address env override
+  const legacyAddress = (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS as string | undefined)?.trim();
+  // 3. Per-network env address
+  const networkAddress = (network === 'mainnet'
+    ? (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_MAINNET as string | undefined)
+    : (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_TESTNET as string | undefined)
+  )?.trim();
 
-  const address = legacyAddress?.trim() || networkAddress?.trim();
+  const address = lsAddress || legacyAddress || networkAddress;
   if (!address) return null;
   return { address, name, network };
 };
@@ -47,14 +73,15 @@ export const getContractConfig = (): ContractConfig | null => {
 export const getTreasuryAddress = (): string | null => {
   const network = getSelectedNetwork();
 
-  const legacy = import.meta.env.VITE_STACKS_TREASURY_ADDRESS as string | undefined;
-  const perNetwork =
-    network === 'mainnet'
-      ? (import.meta.env.VITE_STACKS_TREASURY_ADDRESS_MAINNET as string | undefined)
-      : (import.meta.env.VITE_STACKS_TREASURY_ADDRESS_TESTNET as string | undefined);
+  const legacy = (import.meta.env.VITE_STACKS_TREASURY_ADDRESS as string | undefined)?.trim();
+  const perNetwork = (network === 'mainnet'
+    ? (import.meta.env.VITE_STACKS_TREASURY_ADDRESS_MAINNET as string | undefined)
+    : (import.meta.env.VITE_STACKS_TREASURY_ADDRESS_TESTNET as string | undefined)
+  )?.trim();
 
-  const addr = legacy?.trim() || perNetwork?.trim();
-  return addr || null;
+  // Sensible default: user-provided testnet treasury address.
+  const fallback = network === 'testnet' ? 'ST6E59CS9Z7J1G5SDTH65B526G7HM59RENBCJKE6' : undefined;
+  return legacy || perNetwork || fallback || null;
 };
 
 export const getMintPriceDisplay = (network: StacksNetwork): string => {
