@@ -28,4 +28,6 @@ settings/Testnet.toml
 settings/Mainnet.toml
 
 # Environment files contain app configuration and should not be committed.
-# it; it holds only publishable values (VITE_* vars ship in the JS bundle anyway).
+.env
+.env.local
+.env.*.local
