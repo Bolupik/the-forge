@@ -57,6 +57,12 @@ export const getTreasuryAddress = (): string | null => {
   return addr || null;
 };
 
+export const getMintPriceDisplay = (network: StacksNetwork): string => {
+  // Contract mint-price is currently u5000000 on both testnet and mainnet (5 STX).
+  if (network === 'testnet') return '5 STX';
+  return '5 STX';
+};
+
 export const explorerTxUrl = (txid: string, network: StacksNetwork) =>
   `https://explorer.hiro.so/txid/${txid}?chain=${network}`;
 
