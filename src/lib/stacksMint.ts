@@ -167,10 +167,6 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     postConditionMode: 'allow',
     postConditions: [],
   } as Parameters<typeof request>[1]);
-      Cl.stringAscii(tokenUri),
-    ],
-    network: cfg.network,
-  });
 
   const txid = (result as { txid?: string })?.txid;
   if (!txid) throw new Error('Wallet did not return a tx id');
