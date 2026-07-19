@@ -65,7 +65,11 @@ export const getContractConfig = (): ContractConfig | null => {
     : (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_TESTNET as string | undefined)
   )?.trim();
 
-  const address = lsAddress || legacyAddress || networkAddress;
+  const defaultAddress = network === 'testnet'
+    ? 'STFZPM830QBMN1P2QJ6WQXTM788Z5PV35TWA3JGB'
+    : undefined;
+
+  const address = lsAddress || legacyAddress || networkAddress || defaultAddress;
   if (!address) return null;
   return { address, name, network };
 };
