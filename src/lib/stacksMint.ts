@@ -166,7 +166,7 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     // and the node rejects the broadcast with "unable to parse node response".
     postConditionMode: 'allow',
     postConditions: [],
-  } as Parameters<typeof request>[1]);
+  });
 
   const txid = (result as { txid?: string })?.txid;
   if (!txid) throw new Error('Wallet did not return a tx id');
