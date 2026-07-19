@@ -161,6 +161,11 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
       Cl.stringAscii(tokenUri),
     ],
     network: cfg.network,
+    // The contract executes (stx-transfer? mint-price tx-sender treasury).
+    // Without an allow-mode, Xverse/Leather add a default deny post-condition
+    // and the node rejects the broadcast with "unable to parse node response".
+    postConditionMode: 'allow',
+    postConditions: [],
   });
 
   const txid = (result as { txid?: string })?.txid;
