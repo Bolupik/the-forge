@@ -20,7 +20,7 @@ const MagneticButton = forwardRef<HTMLButtonElement, Props>(
         ref={(node) => {
           innerRef.current = node;
           if (typeof ref === 'function') ref(node);
-          else if (ref) (ref as any).current = node;
+          else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node;
         }}
         style={{ x: reduce ? 0 : sx, y: reduce ? 0 : sy, ...style }}
         whileTap={{ scale: 0.96 }}
@@ -39,7 +39,7 @@ const MagneticButton = forwardRef<HTMLButtonElement, Props>(
           y.set(0);
           onMouseLeave?.(e);
         }}
-        {...(rest as any)}
+        {...(rest as HTMLMotionProps<'button'>)}
       >
         {children}
       </motion.button>

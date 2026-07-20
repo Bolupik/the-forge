@@ -41,15 +41,24 @@ const hexToUtf8 = (hex: string): string => {
   return new TextDecoder("utf-8").decode(bytes);
 };
 
-const extractAddress = (parsed: any): string | undefined => {
+const extractAddress = (parsed: unknown): string | undefined => {
   if (!parsed || typeof parsed !== "object") return undefined;
+  // Wallet storage blobs have no stable schema, so read through a loose shape.
+  const p = parsed as {
+    addresses?: {
+      testnet?: { address?: string };
+      mainnet?: { address?: string };
+      stx?: Array<{ address?: string }>;
+    };
+    userData?: { profile?: { stxAddress?: { testnet?: string; mainnet?: string } } };
+  };
   // Testnet-first: app is locked to Stacks testnet for now.
   return (
-    parsed?.addresses?.testnet?.address ||
-    parsed?.userData?.profile?.stxAddress?.testnet ||
-    parsed?.addresses?.stx?.[0]?.address ||
-    parsed?.addresses?.mainnet?.address ||
-    parsed?.userData?.profile?.stxAddress?.mainnet ||
+    p?.addresses?.testnet?.address ||
+    p?.userData?.profile?.stxAddress?.testnet ||
+    p?.addresses?.stx?.[0]?.address ||
+    p?.addresses?.mainnet?.address ||
+    p?.userData?.profile?.stxAddress?.mainnet ||
     undefined
   );
 };
@@ -60,7 +69,7 @@ export const getAddressFromStorage = (): string | undefined => {
     try {
       const raw = localStorage.getItem(key);
       if (!raw) continue;
-      let parsed: any;
+      let parsed: unknown;
       if (isHex(raw)) {
         try {
           parsed = JSON.parse(hexToUtf8(raw));
@@ -88,7 +97,7 @@ const fetchBnsName = async (address: string): Promise<string | undefined> => {
     const res = await fetch(`https://api.bnsv2.com/names/address/${address}/valid`);
     if (!res.ok) return undefined;
     const data = await res.json();
-    const names: any[] = data?.names ?? [];
+    const names: Array<{ full_name?: string; revoked?: boolean }> = data?.names ?? [];
     const active = names.filter((n) => !n?.revoked);
     const pickByNs = (ns: string) =>
       active.find((n) => n?.full_name?.toLowerCase().endsWith(`.${ns}`));
@@ -133,7 +142,7 @@ const ensureSupabaseSession = async (address: string, bnsName?: string) => {
     if (!userId) return;
 
     const username = bnsName ?? address.slice(0, 20);
-    const profileRow: Record<string, any> = {
+    const profileRow: Record<string, unknown> = {
       user_id: userId,
       stacks_address: address,
       username,
@@ -143,7 +152,7 @@ const ensureSupabaseSession = async (address: string, bnsName?: string) => {
 
     const { error: upsertErr } = await supabase
       .from("profiles")
-      .upsert([profileRow] as any, { onConflict: "user_id" });
+      .upsert([profileRow] as never, { onConflict: "user_id" });
 
     if (upsertErr) {
       console.warn("[StacksAuth] profile upsert failed", upsertErr);
@@ -219,8 +228,8 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
         // ignore
       }
       navigate("/");
-    } catch (err: any) {
-      const msg = String(err?.message || err || "").toLowerCase();
+    } catch (err: unknown) {
+      const msg = String((err as { message?: string })?.message || err || "").toLowerCase();
       if (
         msg.includes("wallet") ||
         msg.includes("extension") ||

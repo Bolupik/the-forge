@@ -107,7 +107,7 @@ const ForgeCard = ({ card, index = 0, showDelete, onDelete, trades = [], staticM
         <div
           className={`forge-frame-fx rarity-${card.rarity}`}
           aria-hidden
-          style={frameIntensity !== undefined ? ({ ['--fx-intensity' as any]: frameIntensity } as React.CSSProperties) : undefined}
+          style={frameIntensity !== undefined ? ({ '--fx-intensity': frameIntensity } as React.CSSProperties) : undefined}
         />
         {/* ============ SVG BEZEL ============ */}
         <svg
