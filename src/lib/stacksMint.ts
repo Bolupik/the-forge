@@ -43,7 +43,7 @@ export const getContractName = (): string => {
     const ls = localStorage.getItem(CONTRACT_NAME_LS_KEY);
     if (ls && ls.trim()) return ls.trim();
   }
-  return (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft';
+  return (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft-v2';
 };
 
 export const setContractName = (name: string) => {
@@ -276,6 +276,115 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     .eq('id', card.id);
 
   return { txid, metadataUrl, imageUrl };
+};
+
+interface MintPackArgs {
+  cards: NFTCard[];
+}
+
+interface MintPackResult {
+  txid: string;
+}
+
+/**
+ * Mint a whole pack in ONE transaction via the contract's `mint-pack` function:
+ * a single wallet signature and a single `mint-price` (5 STX) payment for all
+ * cards. Uses the same sign-only + self-broadcast flow as mintCardOnChain.
+ */
+export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPackResult> => {
+  const cfg = getContractConfig();
+  if (!cfg) throw new Error('Contract not configured. Set the contract address for the selected network in env.');
+  if (cards.length === 0 || cards.length > 10) {
+    throw new Error('A pack must contain between 1 and 10 cards.');
+  }
+
+  const toAscii = (s: string, max: number) =>
+    s.normalize('NFKD').replace(/[^\x20-\x7E]/g, '').trim().slice(0, max);
+
+  // Pin metadata for every card first (parallel), so each has a public
+  // SIP-016 metadata URL before anything touches the chain.
+  const pins = await Promise.all(
+    cards.map(async (card) => {
+      const { data: pinned, error: pinErr } = await supabase.functions.invoke('store-card-metadata', {
+        body: {
+          cardId: card.id,
+          name: card.name,
+          description: card.description,
+          rarity: card.rarity,
+          element: card.element,
+          stats: card.stats,
+          imageUrl: card.imageUrl,
+          serial: card.serial,
+        },
+      });
+      if (pinErr || !pinned?.metadataUrl) {
+        throw new Error(pinErr?.message || `Failed to pin metadata for ${card.name}`);
+      }
+      return { card, metadataUrl: pinned.metadataUrl as string, imageUrl: pinned.imageUrl as string };
+    })
+  );
+
+  // Build the (list 10 {…}) argument for mint-pack.
+  const cardTuples = pins.map(({ card, metadataUrl, imageUrl }) =>
+    Cl.tuple({
+      name: Cl.stringAscii(toAscii(card.name, 64) || 'CardForge Card'),
+      rarity: Cl.stringAscii(toAscii(card.rarity, 16)),
+      'card-type': Cl.stringAscii(toAscii(card.element, 32) || 'UNKNOWN'),
+      power: Cl.uint(Math.max(0, Math.floor(card.stats.ATK))),
+      defense: Cl.uint(Math.max(0, Math.floor(card.stats.DEF))),
+      'image-uri': Cl.stringAscii(toAscii(imageUrl, 256)),
+      'token-uri': Cl.stringAscii(toAscii(metadataUrl, 256)),
+    })
+  );
+  const functionArgs: ClarityValue[] = [Cl.list(cardTuples)];
+
+  const network = stacksNetworkObj(cfg.network);
+
+  const addrRes = (await request('stx_getAddresses')) as {
+    addresses?: Array<{ address: string; publicKey: string }>;
+  };
+  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
+  const publicKey = stxEntry?.publicKey;
+  const senderAddress = stxEntry?.address;
+  if (!publicKey || !senderAddress) {
+    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
+  }
+
+  const nonce = await fetchNonce({ address: senderAddress, network });
+
+  const unsigned = await makeUnsignedContractCall({
+    contractAddress: cfg.address,
+    contractName: cfg.name,
+    functionName: 'mint-pack',
+    functionArgs,
+    publicKey,
+    network,
+    nonce,
+    postConditionMode: PostConditionMode.Allow,
+    postConditions: [],
+  });
+
+  const signRes = (await request('stx_signTransaction', {
+    transaction: serializeTransaction(unsigned),
+    broadcast: false,
+  })) as { transaction?: string };
+  const signedHex = signRes?.transaction;
+  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
+
+  const signedTx = deserializeTransaction(signedHex);
+  const txid = await broadcastRawTx(serializeTransaction(signedTx), cfg.network);
+
+  // One tx covers the whole pack — persist the shared txid on every card row.
+  await Promise.all(
+    pins.map(({ card, metadataUrl, imageUrl }) =>
+      supabase
+        .from('nft_cards')
+        .update({ tx_id: txid, chain_status: 'pending', metadata_url: metadataUrl, image_url: imageUrl })
+        .eq('id', card.id)
+    )
+  );
+
+  return { txid };
 };
 
 /** Poll Hiro API once and update card row when confirmed. */

@@ -3,7 +3,7 @@ import { NFTCard, Rarity } from '@/lib/cardforge';
 import { playCardFlip, playRareReveal, playSuccess, playClick } from '@/lib/sounds';
 import NFTCardComponent from '@/components/NFTCard';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
-import { mintCardOnChain, getContractConfig, explorerTxUrl, getMintPriceDisplay } from '@/lib/stacksMint';
+import { mintPackOnChain, getContractConfig, explorerTxUrl, getMintPriceDisplay } from '@/lib/stacksMint';
 
 interface CardRevealSequenceProps {
   cards: NFTCard[];
@@ -31,7 +31,6 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
   const { userData } = useStacksAuth();
   const contractCfg = getContractConfig();
   const [mintState, setMintState] = useState<'idle' | 'minting' | 'done' | 'error'>('idle');
-  const [mintProgress, setMintProgress] = useState(0);
   const [mintError, setMintError] = useState<string | null>(null);
   const [txids, setTxids] = useState<string[]>([]);
 
@@ -39,15 +38,10 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
     if (!userData?.address || !contractCfg) return;
     setMintState('minting');
     setMintError(null);
-    setMintProgress(0);
-    const ids: string[] = [];
     try {
-      for (let i = 0; i < cards.length; i++) {
-        const { txid } = await mintCardOnChain({ card: cards[i], recipient: userData.address });
-        ids.push(txid);
-        setTxids([...ids]);
-        setMintProgress(i + 1);
-      }
+      // One transaction mints the whole pack and charges mint-price once.
+      const { txid } = await mintPackOnChain({ cards });
+      setTxids([txid]);
       setMintState('done');
       playSuccess();
     } catch (e: unknown) {
@@ -258,16 +252,16 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
                   }}
                 >
                   {mintState === 'minting'
-                    ? `Signing ${mintProgress}/${cards.length}…`
+                    ? 'Confirm in your wallet…'
                     : !userData?.address
                       ? '🔌 Connect your Stacks wallet first'
                       : !contractCfg
                         ? '⚠ Set contract address to mint'
-                        : `🪪 Mint ${cards.length} to my Stacks wallet`}
+                        : `🪪 Mint pack to my Stacks wallet`}
                 </button>
                 {contractCfg && userData?.address && (
                   <span className="font-ui text-[0.55rem] uppercase tracking-[0.2em]" style={{ color: 'var(--cf-muted)' }}>
-                    {getMintPriceDisplay(contractCfg.network)} per card · {cards.length * 5} STX total
+                    {getMintPriceDisplay(contractCfg.network)} for the whole pack · {cards.length} cards
                   </span>
                 )}
                 {!contractCfg && (
@@ -281,13 +275,13 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
             {mintState === 'done' && contractCfg && (
               <div className="w-full p-3 rounded-lg text-center" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)' }}>
                 <p className="font-ui text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: '#4ade80' }}>
-                  ✓ All {cards.length} mint txs submitted
+                  ✓ Pack minted in one transaction
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center mt-2">
-                  {txids.map((t, i) => (
+                  {txids.map((t) => (
                     <a key={t} href={explorerTxUrl(t, contractCfg.network)} target="_blank" rel="noreferrer"
                        className="font-mono text-[0.55rem] underline" style={{ color: 'var(--cf-gold)' }}>
-                      tx{i + 1}↗
+                      View transaction ↗
                     </a>
                   ))}
                 </div>

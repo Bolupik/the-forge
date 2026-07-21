@@ -8,10 +8,10 @@ plan:
   - id: 0
     transactions:
     - transaction-type: contract-publish
-      contract-name: cardforge-nft
+      contract-name: cardforge-nft-v2
       expected-sender: STFZPM830QBMN1P2QJ6WQXTM788Z5PV35TWA3JGB
-      cost: 107670
-      path: contracts/cardforge-nft.clar
+      cost: 131550
+      path: contracts/cardforge-nft-v2.clar
       anchor-block-only: true
       clarity-version: 2
     epoch: '2.4'
