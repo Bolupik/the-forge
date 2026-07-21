@@ -1,5 +1,5 @@
 import { request } from '@stacks/connect';
-import { Cl } from '@stacks/transactions';
+import { Cl, serializeCV, type ClarityValue } from '@stacks/transactions';
 import { supabase } from '@/integrations/supabase/client';
 import type { NFTCard } from '@/lib/cardforge';
 
@@ -139,27 +139,45 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
   const imageUrl: string = pinned.imageUrl;
 
   // Map NFTCard fields to the contract's mint-card arguments.
-  // Truncate to Clarity string-ascii limits.
-  const name = card.name.trim().slice(0, 64);
-  const rarity = card.rarity.trim().slice(0, 16);
-  const cardType = card.element.trim().slice(0, 32);
+  // IMPORTANT: the contract types these as `string-ascii`, which only allows
+  // bytes 0x00–0x7F. Card fields like `element` carry emoji (e.g. "⚡ ELECTRIC")
+  // and names may contain accented/curly characters. `Cl.stringAscii` does NOT
+  // reject these — it silently emits bytes > 127, producing an invalid
+  // string-ascii that the Stacks node refuses to deserialize. The wallet then
+  // surfaces the node's non-JSON error body as "unable to parse node response".
+  // Strip everything outside printable ASCII before encoding, then truncate to
+  // the Clarity length limits.
+  const toAscii = (s: string, max: number) =>
+    s.normalize('NFKD').replace(/[^\x20-\x7E]/g, '').trim().slice(0, max);
+
+  const name = toAscii(card.name, 64) || 'CardForge Card';
+  const rarity = toAscii(card.rarity, 16);
+  const cardType = toAscii(card.element, 32) || 'UNKNOWN';
   const power = Math.max(0, Math.floor(card.stats.ATK));
   const defense = Math.max(0, Math.floor(card.stats.DEF));
-  const imageUri = imageUrl.trim().slice(0, 256);
-  const tokenUri = metadataUrl.trim().slice(0, 256);
+  const imageUri = toAscii(imageUrl, 256);
+  const tokenUri = toAscii(metadataUrl, 256);
+
+  // Pre-serialize every Clarity arg to its wire-format hex string. Passing raw
+  // ClarityValue *objects* forces the wallet to re-serialize them with ITS OWN
+  // bundled @stacks/transactions, and a version skew between the app (v7) and
+  // the wallet's internal copy yields a subtly malformed tx that the node
+  // rejects with a non-JSON body → "unable to parse node response". Hex strings
+  // are the stable wire format every wallet accepts verbatim.
+  const argsHex = [
+    Cl.stringAscii(name),
+    Cl.stringAscii(rarity),
+    Cl.stringAscii(cardType),
+    Cl.uint(power),
+    Cl.uint(defense),
+    Cl.stringAscii(imageUri),
+    Cl.stringAscii(tokenUri),
+  ].map((cv: ClarityValue) => serializeCV(cv));
 
   const result = await request('stx_callContract', {
     contract: `${cfg.address}.${cfg.name}` as `${string}.${string}`,
     functionName: 'mint-card',
-    functionArgs: [
-      Cl.stringAscii(name),
-      Cl.stringAscii(rarity),
-      Cl.stringAscii(cardType),
-      Cl.uint(power),
-      Cl.uint(defense),
-      Cl.stringAscii(imageUri),
-      Cl.stringAscii(tokenUri),
-    ],
+    functionArgs: argsHex,
     network: cfg.network,
     // The contract executes (stx-transfer? mint-price tx-sender treasury).
     // Without an allow-mode, Xverse/Leather add a default deny post-condition
