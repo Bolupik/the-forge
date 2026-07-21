@@ -1,5 +1,14 @@
 import { request } from '@stacks/connect';
-import { Cl, serializeCV, type ClarityValue } from '@stacks/transactions';
+import {
+  Cl,
+  makeUnsignedContractCall,
+  serializeTransaction,
+  deserializeTransaction,
+  PostConditionMode,
+  fetchNonce,
+  type ClarityValue,
+} from '@stacks/transactions';
+import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 import { supabase } from '@/integrations/supabase/client';
 import type { NFTCard } from '@/lib/cardforge';
 
@@ -97,6 +106,49 @@ export const getMintPriceDisplay = (network: StacksNetwork): string => {
 export const explorerTxUrl = (txid: string, network: StacksNetwork) =>
   `https://explorer.hiro.so/txid/${txid}?chain=${network}`;
 
+const nodeBaseUrl = (network: StacksNetwork) =>
+  network === 'mainnet' ? 'https://api.hiro.so' : 'https://api.testnet.hiro.so';
+
+const stacksNetworkObj = (network: StacksNetwork) =>
+  network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
+
+/**
+ * Broadcast a signed transaction ourselves against a known-healthy Hiro node.
+ *
+ * We do NOT let the wallet broadcast (Xverse's Testnet4 broadcast returns a
+ * non-JSON body that surfaces as "Failed to broadcast transaction — unable to
+ * parse node response"). Instead we POST the raw serialized tx to
+ * /v2/transactions and parse the node's real reason on failure.
+ */
+const broadcastRawTx = async (rawTxHex: string, network: StacksNetwork): Promise<string> => {
+  const clean = rawTxHex.startsWith('0x') ? rawTxHex.slice(2) : rawTxHex;
+  const body = new Uint8Array(clean.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+
+  const res = await fetch(`${nodeBaseUrl(network)}/v2/transactions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body,
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    // The node returns a JSON error like { error, reason, reason_data, txid }.
+    let reason = text;
+    try {
+      const j = JSON.parse(text);
+      reason = j.reason || j.error || text;
+      if (j.reason_data) reason += ` — ${JSON.stringify(j.reason_data)}`;
+    } catch {
+      /* non-JSON body: keep raw text */
+    }
+    throw new Error(`Node rejected the transaction: ${reason}`);
+  }
+
+  // Success body is the txid as a JSON string ("abcd…") or bare hex.
+  const txid = text.replace(/^"|"$/g, '').trim();
+  return txid.startsWith('0x') ? txid : `0x${txid}`;
+};
+
 interface MintArgs {
   card: NFTCard;
   recipient: string;       // signer's STX address (tx-sender)
@@ -158,13 +210,7 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
   const imageUri = toAscii(imageUrl, 256);
   const tokenUri = toAscii(metadataUrl, 256);
 
-  // Pre-serialize every Clarity arg to its wire-format hex string. Passing raw
-  // ClarityValue *objects* forces the wallet to re-serialize them with ITS OWN
-  // bundled @stacks/transactions, and a version skew between the app (v7) and
-  // the wallet's internal copy yields a subtly malformed tx that the node
-  // rejects with a non-JSON body → "unable to parse node response". Hex strings
-  // are the stable wire format every wallet accepts verbatim.
-  const argsHex = [
+  const functionArgs: ClarityValue[] = [
     Cl.stringAscii(name),
     Cl.stringAscii(rarity),
     Cl.stringAscii(cardType),
@@ -172,22 +218,57 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     Cl.uint(defense),
     Cl.stringAscii(imageUri),
     Cl.stringAscii(tokenUri),
-  ].map((cv: ClarityValue) => serializeCV(cv));
+  ];
 
-  const result = await request('stx_callContract', {
-    contract: `${cfg.address}.${cfg.name}` as `${string}.${string}`,
+  // --- Sign-only + self-broadcast --------------------------------------------
+  // We do NOT use stx_callContract, because that makes the WALLET broadcast the
+  // signed tx. Xverse's Testnet4 broadcast returns a non-JSON body that surfaces
+  // as "Failed to broadcast transaction (unable to parse node response)".
+  // Instead: fetch the signer's public key, build the unsigned tx ourselves,
+  // ask the wallet to SIGN ONLY, then POST the signed tx to a healthy Hiro node.
+
+  const network = stacksNetworkObj(cfg.network);
+
+  // 1. Public key for the connected account (needed to build the unsigned tx).
+  const addrRes = (await request('stx_getAddresses')) as {
+    addresses?: Array<{ address: string; publicKey: string }>;
+  };
+  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
+  const publicKey = stxEntry?.publicKey;
+  const senderAddress = stxEntry?.address;
+  if (!publicKey || !senderAddress) {
+    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
+  }
+
+  // 2. Current nonce for the signer.
+  const nonce = await fetchNonce({ address: senderAddress, network });
+
+  // 3. Build the unsigned contract-call tx. Allow-mode: the contract itself
+  //    performs the STX transfer of mint-price to the treasury.
+  const unsigned = await makeUnsignedContractCall({
+    contractAddress: cfg.address,
+    contractName: cfg.name,
     functionName: 'mint-card',
-    functionArgs: argsHex,
-    network: cfg.network,
-    // The contract executes (stx-transfer? mint-price tx-sender treasury).
-    // Without an allow-mode, Xverse/Leather add a default deny post-condition
-    // and the node rejects the broadcast with "unable to parse node response".
-    postConditionMode: 'allow',
+    functionArgs,
+    publicKey,
+    network,
+    nonce,
+    postConditionMode: PostConditionMode.Allow,
     postConditions: [],
   });
 
-  const txid = (result as { txid?: string })?.txid;
-  if (!txid) throw new Error('Wallet did not return a tx id');
+  // 4. Ask the wallet to sign (but not broadcast) the serialized tx.
+  const signRes = (await request('stx_signTransaction', {
+    transaction: serializeTransaction(unsigned),
+    broadcast: false,
+  })) as { transaction?: string };
+  const signedHex = signRes?.transaction;
+  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
+
+  // 5. Broadcast the signed tx ourselves to a node we trust.
+  //    deserialize→reserialize normalizes whatever hex form the wallet returns.
+  const signedTx = deserializeTransaction(signedHex);
+  const txid = await broadcastRawTx(serializeTransaction(signedTx), cfg.network);
 
   await supabase
     .from('nft_cards')
