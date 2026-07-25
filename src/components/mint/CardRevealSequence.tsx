@@ -46,8 +46,12 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
       playSuccess();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Mint failed';
-      // user cancelled wallet popup → silent reset
-      if (/cancel|reject|denied/i.test(msg)) {
+      console.error('[mint] pack mint failed:', e);
+      // Only a genuine user cancellation should reset silently. Match the
+      // specific phrases wallets use ("User rejected the request",
+      // "User canceled", "denied by user") — not any error that merely
+      // contains "cancel"/"reject", which would hide real failures.
+      if (/user (rejected|canceled|cancelled|denied)|request (rejected|denied)|rejected by user/i.test(msg)) {
         setMintState('idle');
         return;
       }

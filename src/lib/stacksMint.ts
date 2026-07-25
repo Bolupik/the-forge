@@ -253,6 +253,7 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     publicKey,
     network,
     nonce,
+    fee: BigInt(200000), // explicit fee skips the pre-sign /v2/fees/transaction call that hangs on testnet
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
   });
@@ -360,6 +361,11 @@ export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPack
     publicKey,
     network,
     nonce,
+    // Explicit fee skips makeUnsignedContractCall's pre-sign call to
+    // /v2/fees/transaction. On testnet that estimate hangs/500s for the larger
+    // mint-pack payload, so the promise never reaches stx_signTransaction and
+    // the wallet modal never opens. A flat 0.2 STX fee is safe for a batch call.
+    fee: BigInt(300000),
     postConditionMode: PostConditionMode.Allow,
     postConditions: [],
   });
