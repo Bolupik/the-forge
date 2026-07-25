@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import PackGrid from './mint/PackGrid';
 import PackOpenAnimation from './mint/PackOpenAnimation';
 import CardRevealSequence from './mint/CardRevealSequence';
-import NetworkSwitch from './NetworkSwitch';
 import { getMintPriceDisplay, getSelectedNetwork } from '@/lib/stacksMint';
 import { toast } from 'sonner';
 import { readEdgeError } from '@/lib/edgeError';
@@ -44,9 +43,6 @@ const MintPage = () => {
   const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [minting, setMinting] = useState(false);
-  const [networkVersion, setNetworkVersion] = useState(0);
-
-  const handleNetworkChange = () => setNetworkVersion((v) => v + 1);
 
 
   const loadStats = async () => {
@@ -132,8 +128,8 @@ const MintPage = () => {
   };
 
   return (
-    <div key={networkVersion} className="relative min-h-screen flex flex-col px-4 py-8 sm:py-12">
-      <NetworkSwitch onChange={handleNetworkChange} />
+    <div className="relative min-h-screen flex flex-col px-4 py-8 sm:py-12">
+
 
       {/* Stats bar */}
       <div className="w-full max-w-[860px] mx-auto mb-6 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
