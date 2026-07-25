@@ -12,7 +12,7 @@ interface RevealProps extends Omit<HTMLMotionProps<'div'>, 'children' | 'variant
 /** Subtle in-view fade-up. Respects prefers-reduced-motion. */
 const Reveal = ({ children, delay = 0, once = true, amount = 0.2, ...rest }: RevealProps) => {
   const reduce = useReducedMotion();
-  if (reduce) return <div {...(rest as React.HTMLAttributes<HTMLDivElement>)}>{children}</div>;
+  if (reduce) return <div {...(rest as unknown as React.HTMLAttributes<HTMLDivElement>)}>{children}</div>;
   return (
     <motion.div
       variants={fadeUp}
