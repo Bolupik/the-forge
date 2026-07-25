@@ -4,6 +4,8 @@ import { playCardFlip, playRareReveal, playSuccess, playClick } from '@/lib/soun
 import NFTCardComponent from '@/components/NFTCard';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
 import { mintPackOnChain, getContractConfig, explorerTxUrl, getMintPriceDisplay } from '@/lib/stacksMint';
+import { toast } from 'sonner';
+
 
 interface CardRevealSequenceProps {
   cards: NFTCard[];
@@ -57,7 +59,9 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
       }
       setMintError(msg);
       setMintState('error');
+      toast.error('Mint failed', { description: msg, duration: 12000 });
     }
+
   };
 
   // Auto-reveal sequence

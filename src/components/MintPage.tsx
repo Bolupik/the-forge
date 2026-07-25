@@ -8,6 +8,8 @@ import PackOpenAnimation from './mint/PackOpenAnimation';
 import CardRevealSequence from './mint/CardRevealSequence';
 import NetworkSwitch from './NetworkSwitch';
 import { getMintPriceDisplay, getSelectedNetwork } from '@/lib/stacksMint';
+import { toast } from 'sonner';
+
 
 
 type Phase = 'pick' | 'opening' | 'revealing';
@@ -89,14 +91,18 @@ const MintPage = () => {
 
       if (invokeError) {
         console.error('open-pack invoke error', invokeError);
-        setError(invokeError.message || 'Failed to open pack. Please try again.');
+        const msg = invokeError.message || 'Failed to open pack. Please try again.';
+        setError(msg);
+        toast.error('Pack open failed', { description: msg, duration: 10000 });
         setMinting(false);
         return;
       }
 
       const payload = data as { cards?: DbNftCard[]; error?: string } | null;
       if (!payload || payload.error || !payload.cards?.length) {
-        setError(payload?.error ?? 'No cards returned. Please try again.');
+        const msg = payload?.error ?? 'No cards returned. Please try again.';
+        setError(msg);
+        toast.error('Pack open failed', { description: msg, duration: 10000 });
         setMinting(false);
         return;
       }
@@ -109,7 +115,10 @@ const MintPage = () => {
       loadStats();
     } catch (e: unknown) {
       console.error('open-pack failed', e);
-      setError(e instanceof Error ? e.message : 'Unexpected error opening pack');
+      const msg = e instanceof Error ? e.message : 'Unexpected error opening pack';
+      setError(msg);
+      toast.error('Pack open failed', { description: msg, duration: 10000 });
+
     } finally {
       setMinting(false);
     }
