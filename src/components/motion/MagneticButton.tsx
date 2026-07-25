@@ -39,7 +39,7 @@ const MagneticButton = forwardRef<HTMLButtonElement, Props>(
           y.set(0);
           onMouseLeave?.(e);
         }}
-        {...(rest as HTMLMotionProps<'button'>)}
+        {...(rest as unknown as HTMLMotionProps<'button'>)}
       >
         {children}
       </motion.button>
