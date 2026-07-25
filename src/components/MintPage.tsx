@@ -43,9 +43,6 @@ const MintPage = () => {
   const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [minting, setMinting] = useState(false);
-  const [networkVersion, setNetworkVersion] = useState(0);
-
-  const handleNetworkChange = () => setNetworkVersion((v) => v + 1);
 
 
   const loadStats = async () => {
