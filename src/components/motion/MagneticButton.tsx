@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useReducedMotion, type HTMLMotionProps } from 'framer-motion';
 import { ButtonHTMLAttributes, forwardRef, useRef } from 'react';
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -39,7 +39,7 @@ const MagneticButton = forwardRef<HTMLButtonElement, Props>(
           y.set(0);
           onMouseLeave?.(e);
         }}
-        {...(rest as HTMLMotionProps<'button'>)}
+        {...(rest as unknown as HTMLMotionProps<'button'>)}
       >
         {children}
       </motion.button>
