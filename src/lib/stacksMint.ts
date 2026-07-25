@@ -55,7 +55,9 @@ export const setContractName = (name: string) => {
 
 export const setContractAddress = (network: StacksNetwork, address: string) => {
   if (typeof window === 'undefined') return;
-  const trimmed = address.trim();
+  // Accept a full principal ("ST….my-contract") and store only the bare
+  // address part; the contract name is tracked separately.
+  const trimmed = address.trim().split('.')[0].trim();
   if (trimmed) localStorage.setItem(CONTRACT_LS_KEY(network), trimmed);
   else localStorage.removeItem(CONTRACT_LS_KEY(network));
 };
@@ -80,8 +82,17 @@ export const getContractConfig = (): ContractConfig | null => {
     ? 'STFZPM830QBMN1P2QJ6WQXTM788Z5PV35TWA3JGB'
     : undefined;
 
-  const address = lsAddress || legacyAddress || networkAddress || defaultAddress;
-  if (!address) return null;
+  const rawAddress = lsAddress || legacyAddress || networkAddress || defaultAddress;
+  if (!rawAddress) return null;
+
+  // Tolerate a full contract principal being stored/pasted as the "address"
+  // (e.g. "ST….cardforge-nft" copied from the explorer). Strip any
+  // ".contract-name" suffix so the bare address is what gets c32-decoded.
+  // We intentionally keep the configured contract name (env = v2) rather than
+  // trusting the pasted suffix, since only the v2 contract exposes mint-pack.
+  const dotIdx = rawAddress.indexOf('.');
+  const address = dotIdx === -1 ? rawAddress : rawAddress.slice(0, dotIdx);
+
   return { address, name, network };
 };
 
