@@ -59,7 +59,9 @@ const CardRevealSequence = ({ cards, onDone, onMintAgain }: CardRevealSequencePr
       }
       setMintError(msg);
       setMintState('error');
+      toast.error('Mint failed', { description: msg, duration: 12000 });
     }
+
   };
 
   // Auto-reveal sequence
