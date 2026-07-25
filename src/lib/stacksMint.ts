@@ -112,42 +112,98 @@ const nodeBaseUrl = (network: StacksNetwork) =>
 const stacksNetworkObj = (network: StacksNetwork) =>
   network === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
 
+/** Map on-chain contract abort codes (from `(err uN)`) to human phrases. */
+const CONTRACT_ERR_CODES: Record<string, string> = {
+  u100: 'Owner-only action (err u100).',
+  u101: 'Not the token owner (err u101).',
+  u102: 'Token not found (err u102).',
+  u103: 'Listing price must be greater than zero (err u103).',
+  u104: 'Card is already listed (err u104).',
+  u105: 'Card is not listed (err u105).',
+  u106: 'You cannot buy your own listing (err u106).',
+  u107: 'Max supply reached — no more cards can be minted (err u107).',
+  u108: 'Minting is currently disabled on the contract (err u108).',
+  u109: 'Invalid rarity value passed to the contract (err u109).',
+  u110: 'Invalid supply configuration (err u110).',
+  u111: 'Pack must contain at least one card (err u111).',
+};
+
+/** Map Stacks node reject-reason codes to friendlier explanations. */
+const NODE_REASON_HINTS: Record<string, string> = {
+  ConflictingNonceInMempool: 'Another transaction with the same nonce is already pending. Wait for it to confirm or bump the nonce.',
+  BadNonce: 'Your wallet used a stale nonce. Refresh the wallet and try again.',
+  NotEnoughFunds: 'Not enough STX in the wallet to cover mint price + fee. Fund the wallet from the testnet faucet.',
+  FeeTooLow: 'The transaction fee is below the network minimum. Try again.',
+  ContractAlreadyExists: 'A contract with this name is already deployed at this address.',
+  NoSuchContract: 'The target contract does not exist on this network. Check the contract address / network.',
+  NoSuchPublicFunction: 'The contract does not expose this function. It may be a different version than the app expects.',
+  BadFunctionArgument: 'One of the arguments failed the contract\'s type or length check.',
+  AbortByResponse: 'The contract aborted the call.',
+  AbortByPostCondition: 'A post-condition rejected the transfer.',
+  SignatureValidation: 'Signature validation failed. Reconnect the wallet and try again.',
+};
+
+const formatNodeReason = (raw: string): string => {
+  const trimmed = raw.trim();
+  if (!trimmed) return 'Empty response from node';
+
+  // Try structured JSON first: { error, reason, reason_data: { message, ... } }
+  try {
+    const j = JSON.parse(trimmed);
+    const reason: string = j.reason || j.error || '';
+    const hint = reason && NODE_REASON_HINTS[reason];
+    const data = j.reason_data ?? {};
+
+    // Contract abort → extract the (err uN) code from repr like "(err u107)"
+    if (reason === 'AbortByResponse' || reason === 'AbortByPostCondition') {
+      const repr: string = data?.response?.repr ?? data?.repr ?? '';
+      const m = repr.match(/\(err\s+(u\d+)\)/);
+      if (m && CONTRACT_ERR_CODES[m[1]]) {
+        return `Contract rejected the mint: ${CONTRACT_ERR_CODES[m[1]]}`;
+      }
+      if (repr) return `Contract aborted: ${repr}`;
+    }
+
+    const dataMsg = data?.message || data?.expected || '';
+    const parts = [hint || reason || 'Unknown reason', dataMsg].filter(Boolean);
+    return parts.join(' — ');
+  } catch {
+    /* not JSON */
+  }
+  // Non-JSON body (e.g. HTML 502): keep first line only
+  return trimmed.split('\n')[0].slice(0, 240);
+};
+
 /**
  * Broadcast a signed transaction ourselves against a known-healthy Hiro node.
- *
- * We do NOT let the wallet broadcast (Xverse's Testnet4 broadcast returns a
- * non-JSON body that surfaces as "Failed to broadcast transaction — unable to
- * parse node response"). Instead we POST the raw serialized tx to
- * /v2/transactions and parse the node's real reason on failure.
+ * Parses the node's real reason on failure and maps common codes to plain English.
  */
 const broadcastRawTx = async (rawTxHex: string, network: StacksNetwork): Promise<string> => {
   const clean = rawTxHex.startsWith('0x') ? rawTxHex.slice(2) : rawTxHex;
   const body = new Uint8Array(clean.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
 
-  const res = await fetch(`${nodeBaseUrl(network)}/v2/transactions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/octet-stream' },
-    body,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${nodeBaseUrl(network)}/v2/transactions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body,
+    });
+  } catch (e) {
+    throw new Error(`Could not reach the Stacks ${network} node: ${e instanceof Error ? e.message : String(e)}`);
+  }
 
   const text = await res.text();
   if (!res.ok) {
-    // The node returns a JSON error like { error, reason, reason_data, txid }.
-    let reason = text;
-    try {
-      const j = JSON.parse(text);
-      reason = j.reason || j.error || text;
-      if (j.reason_data) reason += ` — ${JSON.stringify(j.reason_data)}`;
-    } catch {
-      /* non-JSON body: keep raw text */
-    }
-    throw new Error(`Node rejected the transaction: ${reason}`);
+    const reason = formatNodeReason(text);
+    console.error('[mint] node rejected tx', { status: res.status, body: text });
+    throw new Error(`Stacks node ${res.status}: ${reason}`);
   }
 
-  // Success body is the txid as a JSON string ("abcd…") or bare hex.
   const txid = text.replace(/^"|"$/g, '').trim();
   return txid.startsWith('0x') ? txid : `0x${txid}`;
 };
+
 
 interface MintArgs {
   card: NFTCard;
