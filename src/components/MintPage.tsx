@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import PackGrid from './mint/PackGrid';
 import PackOpenAnimation from './mint/PackOpenAnimation';
 import CardRevealSequence from './mint/CardRevealSequence';
-import NetworkSwitch from './NetworkSwitch';
 import { getMintPriceDisplay, getSelectedNetwork } from '@/lib/stacksMint';
 import { toast } from 'sonner';
 import { readEdgeError } from '@/lib/edgeError';
