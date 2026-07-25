@@ -9,7 +9,7 @@ import CardRevealSequence from './mint/CardRevealSequence';
 import NetworkSwitch from './NetworkSwitch';
 import { getMintPriceDisplay, getSelectedNetwork } from '@/lib/stacksMint';
 import { toast } from 'sonner';
-
+import { readEdgeError } from '@/lib/edgeError';
 
 
 type Phase = 'pick' | 'opening' | 'revealing';
@@ -91,9 +91,14 @@ const MintPage = () => {
 
       if (invokeError) {
         console.error('open-pack invoke error', invokeError);
+<<<<<<< HEAD
         const msg = invokeError.message || 'Failed to open pack. Please try again.';
         setError(msg);
         toast.error('Pack open failed', { description: msg, duration: 10000 });
+=======
+        const msg = await readEdgeError(invokeError, 'Failed to open pack');
+        setError(msg);
+>>>>>>> f7ba45d (fix: surface real edge-function errors and validate Stacks addresses)
         setMinting(false);
         return;
       }

@@ -6,8 +6,10 @@ import {
   deserializeTransaction,
   PostConditionMode,
   fetchNonce,
+  validateStacksAddress,
   type ClarityValue,
 } from '@stacks/transactions';
+import { readEdgeError } from '@/lib/edgeError';
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 import { supabase } from '@/integrations/supabase/client';
 import type { NFTCard } from '@/lib/cardforge';
@@ -223,9 +225,19 @@ interface MintResult {
  *    contract. The signer (tx-sender) is the recipient.
  * 3. Persists the resulting txid + pending status on the card row.
  */
+const assertValidContractAddress = (cfg: ContractConfig) => {
+  if (!validateStacksAddress(cfg.address)) {
+    throw new Error(
+      `The configured contract address "${cfg.address}" is not a valid Stacks address. ` +
+        `Open "Set contract" in the chain bar and paste the correct ${cfg.network} deployer address (starts with ${cfg.network === 'mainnet' ? 'SP' : 'ST'}).`
+    );
+  }
+};
+
 export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> => {
   const cfg = getContractConfig();
   if (!cfg) throw new Error('Contract not configured. Set the contract address for the selected network in env.');
+  assertValidContractAddress(cfg);
 
   // Pin metadata to Supabase Storage (SIP-016 compatible)
   const { data: pinned, error: pinErr } = await supabase.functions.invoke('store-card-metadata', {
@@ -351,6 +363,7 @@ interface MintPackResult {
 export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPackResult> => {
   const cfg = getContractConfig();
   if (!cfg) throw new Error('Contract not configured. Set the contract address for the selected network in env.');
+  assertValidContractAddress(cfg);
   if (cards.length === 0 || cards.length > 10) {
     throw new Error('A pack must contain between 1 and 10 cards.');
   }
@@ -375,7 +388,7 @@ export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPack
         },
       });
       if (pinErr || !pinned?.metadataUrl) {
-        throw new Error(pinErr?.message || `Failed to pin metadata for ${card.name}`);
+        throw new Error(pinErr ? await readEdgeError(pinErr, `Failed to pin metadata for ${card.name}`) : `Failed to pin metadata for ${card.name}`);
       }
       return { card, metadataUrl: pinned.metadataUrl as string, imageUrl: pinned.imageUrl as string };
     })
@@ -405,6 +418,9 @@ export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPack
   const senderAddress = stxEntry?.address;
   if (!publicKey || !senderAddress) {
     throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
+  }
+  if (!validateStacksAddress(senderAddress)) {
+    throw new Error(`Your wallet returned an invalid Stacks address ("${senderAddress}"). Reconnect the wallet and make sure it is on ${network === STACKS_MAINNET ? 'mainnet' : 'testnet'}.`);
   }
 
   const nonce = await fetchNonce({ address: senderAddress, network });
