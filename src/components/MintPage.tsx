@@ -8,6 +8,8 @@ import PackOpenAnimation from './mint/PackOpenAnimation';
 import CardRevealSequence from './mint/CardRevealSequence';
 import NetworkSwitch from './NetworkSwitch';
 import { getMintPriceDisplay, getSelectedNetwork } from '@/lib/stacksMint';
+import { toast } from 'sonner';
+
 
 
 type Phase = 'pick' | 'opening' | 'revealing';
