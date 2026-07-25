@@ -91,17 +91,13 @@ const MintPage = () => {
 
       if (invokeError) {
         console.error('open-pack invoke error', invokeError);
-<<<<<<< HEAD
-        const msg = invokeError.message || 'Failed to open pack. Please try again.';
-        setError(msg);
-        toast.error('Pack open failed', { description: msg, duration: 10000 });
-=======
         const msg = await readEdgeError(invokeError, 'Failed to open pack');
         setError(msg);
->>>>>>> f7ba45d (fix: surface real edge-function errors and validate Stacks addresses)
+        toast.error('Pack open failed', { description: msg, duration: 10000 });
         setMinting(false);
         return;
       }
+
 
       const payload = data as { cards?: DbNftCard[]; error?: string } | null;
       if (!payload || payload.error || !payload.cards?.length) {
