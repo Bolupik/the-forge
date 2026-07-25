@@ -21,6 +21,25 @@ const NETWORK_LS_KEY = 'cf_stacks_network_v1';
 const CONTRACT_LS_KEY = (n: StacksNetwork) => `cf_stacks_contract_${n}_v1`;
 const CONTRACT_NAME_LS_KEY = 'cf_stacks_contract_name_v1';
 
+/**
+ * The runtime chain-config UI (network toggle + "Set contract") was removed, so
+ * env is now the single source of truth. Older builds persisted overrides in
+ * localStorage that can still be stale (e.g. a v1 contract name that lacks
+ * mint-pack), which makes the wallet fail with "unable to find the function
+ * metadata". Purge those legacy keys once on load so they can never win again.
+ */
+const purgeLegacyChainOverrides = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(CONTRACT_NAME_LS_KEY);
+    localStorage.removeItem(CONTRACT_LS_KEY('testnet'));
+    localStorage.removeItem(CONTRACT_LS_KEY('mainnet'));
+  } catch {
+    /* ignore */
+  }
+};
+purgeLegacyChainOverrides();
+
 export const getSelectedNetwork = (): StacksNetwork => {
   if (typeof window === 'undefined') return 'testnet';
   const stored = localStorage.getItem(NETWORK_LS_KEY);
@@ -40,39 +59,24 @@ export interface ContractConfig {
   network: StacksNetwork;
 }
 
+/**
+ * Contract name comes from env only. `.contract-name` suffixes are stripped in
+ * case someone set the env to a full principal by mistake.
+ */
 export const getContractName = (): string => {
-  if (typeof window !== 'undefined') {
-    const ls = localStorage.getItem(CONTRACT_NAME_LS_KEY);
-    if (ls && ls.trim()) return ls.trim();
-  }
-  return (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined) || 'cardforge-nft-v2';
-};
-
-export const setContractName = (name: string) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(CONTRACT_NAME_LS_KEY, name.trim());
-};
-
-export const setContractAddress = (network: StacksNetwork, address: string) => {
-  if (typeof window === 'undefined') return;
-  // Accept a full principal ("ST….my-contract") and store only the bare
-  // address part; the contract name is tracked separately.
-  const trimmed = address.trim().split('.')[0].trim();
-  if (trimmed) localStorage.setItem(CONTRACT_LS_KEY(network), trimmed);
-  else localStorage.removeItem(CONTRACT_LS_KEY(network));
+  const raw = (import.meta.env.VITE_STACKS_CONTRACT_NAME as string | undefined)?.trim();
+  const name = raw && raw.includes('.') ? raw.slice(raw.indexOf('.') + 1) : raw;
+  return name || 'cardforge-nft-v2';
 };
 
 export const getContractConfig = (): ContractConfig | null => {
   const network = getSelectedNetwork();
   const name = getContractName();
 
-  // 1. LocalStorage override (runtime-editable in UI)
-  const lsAddress = typeof window !== 'undefined'
-    ? localStorage.getItem(CONTRACT_LS_KEY(network))?.trim()
-    : undefined;
-  // 2. Legacy single-address env override
+  // Env is the source of truth (the runtime override UI was removed).
+  // 1. Legacy single-address env override
   const legacyAddress = (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS as string | undefined)?.trim();
-  // 3. Per-network env address
+  // 2. Per-network env address
   const networkAddress = (network === 'mainnet'
     ? (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_MAINNET as string | undefined)
     : (import.meta.env.VITE_STACKS_CONTRACT_ADDRESS_TESTNET as string | undefined)
@@ -82,14 +86,12 @@ export const getContractConfig = (): ContractConfig | null => {
     ? 'STFZPM830QBMN1P2QJ6WQXTM788Z5PV35TWA3JGB'
     : undefined;
 
-  const rawAddress = lsAddress || legacyAddress || networkAddress || defaultAddress;
+  const rawAddress = legacyAddress || networkAddress || defaultAddress;
   if (!rawAddress) return null;
 
-  // Tolerate a full contract principal being stored/pasted as the "address"
-  // (e.g. "ST….cardforge-nft" copied from the explorer). Strip any
-  // ".contract-name" suffix so the bare address is what gets c32-decoded.
-  // We intentionally keep the configured contract name (env = v2) rather than
-  // trusting the pasted suffix, since only the v2 contract exposes mint-pack.
+  // Tolerate a full contract principal in env (e.g. "ST….cardforge-nft-v2"):
+  // strip any ".contract-name" suffix so the bare address is what gets
+  // c32-decoded. The name still comes from getContractName().
   const dotIdx = rawAddress.indexOf('.');
   const address = dotIdx === -1 ? rawAddress : rawAddress.slice(0, dotIdx);
 
