@@ -176,35 +176,77 @@ export type Database = {
           },
         ]
       }
+      passkey_credentials: {
+        Row: {
+          counter: number
+          created_at: string
+          credential_id: string
+          id: string
+          label: string | null
+          last_used_at: string | null
+          public_key: string
+          transports: string[]
+          user_id: string
+        }
+        Insert: {
+          counter?: number
+          created_at?: string
+          credential_id: string
+          id?: string
+          label?: string | null
+          last_used_at?: string | null
+          public_key: string
+          transports?: string[]
+          user_id: string
+        }
+        Update: {
+          counter?: number
+          created_at?: string
+          credential_id?: string
+          id?: string
+          label?: string | null
+          last_used_at?: string | null
+          public_key?: string
+          transports?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          auth_method: string
           avatar_url: string | null
           bns_name: string | null
           created_at: string
           display_name: string | null
           id: string
+          recovery_phrase_backed_up: boolean
           stacks_address: string | null
           updated_at: string
           user_id: string
           username: string | null
         }
         Insert: {
+          auth_method?: string
           avatar_url?: string | null
           bns_name?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          recovery_phrase_backed_up?: boolean
           stacks_address?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
         }
         Update: {
+          auth_method?: string
           avatar_url?: string | null
           bns_name?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          recovery_phrase_backed_up?: boolean
           stacks_address?: string | null
           updated_at?: string
           user_id?: string
@@ -268,6 +310,36 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      webauthn_challenges: {
+        Row: {
+          challenge: string
+          created_at: string
+          expires_at: string
+          id: string
+          kind: string
+          session_key: string
+          user_id: string | null
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind: string
+          session_key: string
+          user_id?: string | null
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          session_key?: string
+          user_id?: string | null
         }
         Relationships: []
       }
