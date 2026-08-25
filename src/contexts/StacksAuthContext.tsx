@@ -16,11 +16,19 @@ export interface StacksUserData {
   bnsName?: string;
 }
 
+/** How the current session holds its keys. */
+export type WalletKind = 'connect' | 'embedded';
+
 interface StacksAuthContextValue {
   isAuthenticated: boolean;
   userData: StacksUserData | null;
   isLoading: boolean;
+  walletKind: WalletKind | null;
   signIn: () => Promise<void>;
+  /** Passkey sign-in for an account that already has an embedded wallet. */
+  signInPasskey: () => Promise<void>;
+  /** Passkey signup: creates the account + wallet, returns the phrase to back up. */
+  signUpPasskey: (displayName?: string) => Promise<string>;
   signOut: () => Promise<void>;
   truncateAddress: (addr: string) => string;
 }
@@ -28,6 +36,7 @@ interface StacksAuthContextValue {
 const StacksAuthContext = createContext<StacksAuthContextValue | null>(null);
 
 const STORAGE_KEYS = ["@stacks/connect", "blockstack-session", "stacks-session"];
+
 
 /* ------------------------------ helpers ------------------------------ */
 
@@ -168,6 +177,7 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState<StacksUserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [walletKind, setWalletKind] = useState<WalletKind | null>(null);
   const navigate = useNavigate();
   const mounted = useRef(true);
 
@@ -179,6 +189,24 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
 
     (async () => {
       try {
+        // 1. Embedded passkey wallet: a vault on this device + a live session.
+        const vaultAddress = getVaultAddress(getSelectedNetwork());
+        if (vaultAddress) {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) {
+            if (!mounted.current) return;
+            setUserData({ address: vaultAddress });
+            setWalletKind("embedded");
+            setIsAuthenticated(true);
+            setIsLoading(false);
+            fetchBnsName(vaultAddress).then((bnsName) => {
+              if (mounted.current && bnsName) setUserData({ address: vaultAddress, bnsName });
+            });
+            return;
+          }
+        }
+
+        // 2. External wallet (Xverse / Leather) via @stacks/connect.
         const connected = (() => {
           try {
             return isConnected();
@@ -190,6 +218,7 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
         if (connected && address) {
           if (!mounted.current) return;
           setUserData({ address });
+          setWalletKind("connect");
           setIsAuthenticated(true);
           setIsLoading(false);
           // Background: fetch BNS + bridge to Supabase
@@ -220,6 +249,7 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
 
       const bnsName = await fetchBnsName(address);
       setUserData({ address, bnsName });
+      setWalletKind("connect");
       setIsAuthenticated(true);
       await ensureSupabaseSession(address, bnsName);
       try {
@@ -244,18 +274,87 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [navigate]);
 
+  /** Link the embedded wallet address onto the profile row. */
+  const syncEmbeddedProfile = useCallback(async (address: string, bnsName?: string) => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user?.id;
+      if (!userId) return;
+      const username = bnsName ?? address.slice(0, 20);
+      await supabase.from("profiles").upsert(
+        [
+          {
+            user_id: userId,
+            stacks_address: address,
+            username,
+            display_name: bnsName ?? username,
+            auth_method: "passkey",
+          },
+        ] as never,
+        { onConflict: "user_id" },
+      );
+    } catch (e) {
+      console.warn("[StacksAuth] embedded profile sync failed", e);
+    }
+  }, []);
+
+  /**
+   * Passkey signup: verify the new passkey, create the auth account, then
+   * generate a device-only wallet sealed to that passkey. The returned phrase is
+   * shown once for backup and never persisted in plaintext.
+   */
+  const signUpPasskey = useCallback(
+    async (displayName?: string): Promise<string> => {
+      const { credentialId } = await signUpWithPasskey(displayName);
+      const created = await createWalletForPasskey(credentialId);
+      const address = created.address[getSelectedNetwork()];
+
+      setUserData({ address });
+      setWalletKind("embedded");
+      setIsAuthenticated(true);
+      await syncEmbeddedProfile(address);
+      return created.seedPhrase;
+    },
+    [syncEmbeddedProfile],
+  );
+
+  const signInPasskey = useCallback(async () => {
+    await signInWithPasskey();
+
+    const address = getVaultAddress(getSelectedNetwork());
+    if (!address) {
+      // Signed in, but this device holds no vault — the wallet must be restored.
+      setWalletKind("embedded");
+      setIsAuthenticated(true);
+      navigate("/wallet");
+      return;
+    }
+
+    setUserData({ address });
+    setWalletKind("embedded");
+    setIsAuthenticated(true);
+    const bnsName = await fetchBnsName(address);
+    if (bnsName) setUserData({ address, bnsName });
+    await syncEmbeddedProfile(address, bnsName);
+    navigate("/gallery");
+  }, [navigate, syncEmbeddedProfile]);
+
   const signOut = useCallback(async () => {
     try {
       disconnect();
     } catch {
       // ignore
     }
+    // Wipe the decrypted seed from memory. The encrypted vault stays on the
+    // device so the user can sign back in with their passkey.
+    lockWallet();
     try {
       await supabase.auth.signOut();
     } catch {
       // ignore
     }
     setUserData(null);
+    setWalletKind(null);
     setIsAuthenticated(false);
     navigate("/auth");
   }, [navigate]);
@@ -266,7 +365,10 @@ export const StacksAuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         userData,
         isLoading,
+        walletKind,
         signIn,
+        signInPasskey,
+        signUpPasskey,
         signOut,
         truncateAddress,
       }}
@@ -283,3 +385,4 @@ export const useStacksAuth = (): StacksAuthContextValue => {
   }
   return ctx;
 };
+
