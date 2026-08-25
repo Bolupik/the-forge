@@ -16,11 +16,19 @@ export interface StacksUserData {
   bnsName?: string;
 }
 
+/** How the current session holds its keys. */
+export type WalletKind = 'connect' | 'embedded';
+
 interface StacksAuthContextValue {
   isAuthenticated: boolean;
   userData: StacksUserData | null;
   isLoading: boolean;
+  walletKind: WalletKind | null;
   signIn: () => Promise<void>;
+  /** Passkey sign-in for an account that already has an embedded wallet. */
+  signInPasskey: () => Promise<void>;
+  /** Passkey signup: creates the account + wallet, returns the phrase to back up. */
+  signUpPasskey: (displayName?: string) => Promise<string>;
   signOut: () => Promise<void>;
   truncateAddress: (addr: string) => string;
 }
@@ -28,6 +36,7 @@ interface StacksAuthContextValue {
 const StacksAuthContext = createContext<StacksAuthContextValue | null>(null);
 
 const STORAGE_KEYS = ["@stacks/connect", "blockstack-session", "stacks-session"];
+
 
 /* ------------------------------ helpers ------------------------------ */
 
