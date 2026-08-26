@@ -14,6 +14,7 @@ import Mint from "./pages/Mint.tsx";
 import Trading from "./pages/Trading.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import CardPreview from "./pages/CardPreview.tsx";
+import Wallet from "./pages/Wallet.tsx";
 
 const queryClient = new QueryClient();
 

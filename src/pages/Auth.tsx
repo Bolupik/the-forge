@@ -1,15 +1,41 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import ParticleField from '@/components/ParticleField';
+import RecoveryPhraseBackup from '@/components/wallet/RecoveryPhraseBackup';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
+import { describePasskeyError, platformAuthenticatorAvailable } from '@/lib/passkeyAuth';
 
 const Auth = () => {
-  const { isAuthenticated, isLoading, signIn } = useStacksAuth();
+  const { isAuthenticated, isLoading, signIn, signInPasskey, signUpPasskey } = useStacksAuth();
   const navigate = useNavigate();
+  const [pendingPhrase, setPendingPhrase] = useState<string | null>(null);
+  const [busy, setBusy] = useState<'up' | 'in' | null>(null);
+  const [platformPasskey, setPlatformPasskey] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) navigate('/gallery', { replace: true });
   }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
+    platformAuthenticatorAvailable().then(setPlatformPasskey);
+  }, []);
+
+  const handlePasskey = async (mode: 'up' | 'in') => {
+    setBusy(mode);
+    try {
+      if (mode === 'up') {
+        const phrase = await signUpPasskey();
+        setPendingPhrase(phrase);
+      } else {
+        await signInPasskey();
+      }
+    } catch (e) {
+      toast.error(describePasskeyError(e));
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <div className="min-h-screen relative">
