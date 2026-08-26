@@ -37,6 +37,19 @@ const Auth = () => {
     }
   };
 
+  // Just signed up with a passkey: force the one-time phrase backup before
+  // letting the user anywhere near their new wallet.
+  if (pendingPhrase) {
+    return (
+      <div className="min-h-screen relative">
+        <ParticleField />
+        <div className="fixed inset-0 flex items-center justify-center z-10 px-4 overflow-y-auto py-10">
+          <RecoveryPhraseBackup phrase={pendingPhrase} onDone={() => navigate('/gallery')} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen relative">
       <ParticleField />
