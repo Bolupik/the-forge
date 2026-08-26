@@ -68,7 +68,7 @@ export const signUpWithPasskey = async (displayName?: string): Promise<PasskeySi
   const { options, sessionKey } = await invoke<{
     options: PublicKeyCredentialCreationOptionsJSON;
     sessionKey: string;
-  }>('passkey-register-options');
+  }>('passkey-register-options', { mode: 'signup' });
 
   const attestation = await startRegistration({ optionsJSON: options });
 
@@ -112,7 +112,7 @@ export const addPasskeyToAccount = async (label?: string): Promise<{ credentialI
   const { options, sessionKey } = await invoke<{
     options: PublicKeyCredentialCreationOptionsJSON;
     sessionKey: string;
-  }>('passkey-register-options');
+  }>('passkey-register-options', { mode: 'add' });
 
   const attestation = await startRegistration({ optionsJSON: options });
 

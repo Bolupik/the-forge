@@ -1,7 +1,12 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { generateRegistrationOptions } from 'npm:@simplewebauthn/server@13';
+import { z } from 'npm:zod@3';
 import { admin, json, putChallenge, RP_NAME, rpFromRequest } from '../_shared/webauthn.ts';
+
+const BodySchema = z.object({
+  mode: z.enum(['signup', 'add']).default('signup'),
+});
 
 /**
  * Build WebAuthn creation options.
@@ -13,13 +18,22 @@ Deno.serve(async (req) => {
 
   try {
     const { rpID } = rpFromRequest(req);
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const parsed = BodySchema.safeParse(body);
+    if (!parsed.success) {
+      return json({ error: parsed.error.flatten().fieldErrors }, 400, corsHeaders);
+    }
+
     const authHeader = req.headers.get('Authorization');
+    const shouldAttachToExistingUser = parsed.data.mode === 'add';
 
     let userId: string | null = null;
     let userName = 'CardForge player';
     let excludeCredentials: { id: string; transports?: AuthenticatorTransport[] }[] = [];
 
-    if (authHeader) {
+    if (shouldAttachToExistingUser) {
+      if (!authHeader) return json({ error: 'Sign in required' }, 401, corsHeaders);
+
       const scoped = createClient(
         Deno.env.get('SUPABASE_URL')!,
         Deno.env.get('SUPABASE_ANON_KEY')!,
@@ -63,7 +77,7 @@ Deno.serve(async (req) => {
     });
 
     const sessionKey = await putChallenge('register', options.challenge, userId);
-    return json({ options, sessionKey, mode: userId ? 'add' : 'signup' }, 200, corsHeaders);
+    return json({ options, sessionKey, mode: shouldAttachToExistingUser ? 'add' : 'signup' }, 200, corsHeaders);
   } catch (e) {
     console.error('[passkey-register-options]', e);
     return json({ error: e instanceof Error ? e.message : 'Unexpected error' }, 400, corsHeaders);
