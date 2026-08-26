@@ -61,6 +61,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/wallet"
+              element={
+                <ProtectedRoute>
+                  <Wallet />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/admin" element={<Admin />} />
             <Route path="/card-preview" element={<CardPreview />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
