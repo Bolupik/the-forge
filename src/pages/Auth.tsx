@@ -1,15 +1,54 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import ParticleField from '@/components/ParticleField';
+import RecoveryPhraseBackup from '@/components/wallet/RecoveryPhraseBackup';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
+import { describePasskeyError, platformAuthenticatorAvailable } from '@/lib/passkeyAuth';
 
 const Auth = () => {
-  const { isAuthenticated, isLoading, signIn } = useStacksAuth();
+  const { isAuthenticated, isLoading, signIn, signInPasskey, signUpPasskey } = useStacksAuth();
   const navigate = useNavigate();
+  const [pendingPhrase, setPendingPhrase] = useState<string | null>(null);
+  const [busy, setBusy] = useState<'up' | 'in' | null>(null);
+  const [platformPasskey, setPlatformPasskey] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) navigate('/gallery', { replace: true });
   }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
+    platformAuthenticatorAvailable().then(setPlatformPasskey);
+  }, []);
+
+  const handlePasskey = async (mode: 'up' | 'in') => {
+    setBusy(mode);
+    try {
+      if (mode === 'up') {
+        const phrase = await signUpPasskey();
+        setPendingPhrase(phrase);
+      } else {
+        await signInPasskey();
+      }
+    } catch (e) {
+      toast.error(describePasskeyError(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // Just signed up with a passkey: force the one-time phrase backup before
+  // letting the user anywhere near their new wallet.
+  if (pendingPhrase) {
+    return (
+      <div className="min-h-screen relative">
+        <ParticleField />
+        <div className="fixed inset-0 flex items-center justify-center z-10 px-4 overflow-y-auto py-10">
+          <RecoveryPhraseBackup phrase={pendingPhrase} onDone={() => navigate('/gallery')} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative">
@@ -83,27 +122,63 @@ const Auth = () => {
             className="relative text-center text-sm mb-8 leading-relaxed"
             style={{ color: 'var(--cf-muted2)' }}
           >
-            Sign in with your Stacks wallet to mint, trade and view your collection.
+            Sign in with a passkey (Face ID, Touch ID, Windows Hello or PIN) and get a built-in Stacks
+            wallet — or connect an external Xverse / Leather wallet.
           </p>
+
+          {/* Passkey-first */}
+          {platformPasskey && (
+            <div className="relative flex flex-col gap-3 mb-6">
+              <button
+                type="button"
+                onClick={() => handlePasskey('up')}
+                disabled={busy !== null}
+                className="w-full py-4 font-display text-sm font-bold tracking-wider rounded-lg transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'linear-gradient(135deg, #a02d22, #e0483a)',
+                  color: 'var(--cf-bg)',
+                  boxShadow: '0 4px 20px rgba(224,72,58,0.3)',
+                }}
+              >
+                {busy === 'up' ? 'Creating…' : '✦ Create account with passkey'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePasskey('in')}
+                disabled={busy !== null}
+                className="w-full py-4 font-display text-sm font-bold tracking-wider rounded-lg transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  border: '1px solid var(--cf-border2)',
+                  color: 'var(--cf-gold)',
+                  background: 'rgba(224,72,58,0.06)',
+                }}
+              >
+                {busy === 'in' ? 'Verifying…' : '👆 Sign in with passkey'}
+              </button>
+              <p className="text-center text-[0.62rem]" style={{ color: 'var(--cf-muted)' }}>
+                A Stacks wallet is created automatically and stays on this device, unlocked by your passkey.
+              </p>
+              <div className="flex items-center gap-4 my-1">
+                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--cf-border2))' }} />
+                <span className="font-ui text-[0.6rem] uppercase tracking-[0.25em]" style={{ color: 'var(--cf-muted)' }}>or</span>
+                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, var(--cf-border2), transparent)' }} />
+              </div>
+            </div>
+          )}
 
           <button
             type="button"
             onClick={signIn}
-            disabled={isLoading}
+            disabled={isLoading || busy !== null}
             className="relative w-full py-4 font-display text-sm font-bold tracking-wider rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a, #ffb1a6, #e0483a)',
+              background: platformPasskey
+                ? 'transparent'
+                : 'linear-gradient(135deg, #a02d22, #ff8a7a, #e0483a, #ffb1a6, #e0483a)',
               backgroundSize: '300% 100%',
-              color: 'var(--cf-bg)',
-              boxShadow: '0 4px 20px rgba(224,72,58,0.3)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundPosition = '100% 0';
-              e.currentTarget.style.boxShadow = '0 8px 30px rgba(224,72,58,0.45)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundPosition = '0% 0';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(224,72,58,0.3)';
+              border: platformPasskey ? '1px solid var(--cf-border2)' : 'none',
+              color: platformPasskey ? 'var(--cf-fg)' : 'var(--cf-bg)',
+              boxShadow: platformPasskey ? 'none' : '0 4px 20px rgba(224,72,58,0.3)',
             }}
           >
             <span className="relative z-10">🔗 Connect Stacks Wallet</span>

@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ParticleField from '@/components/ParticleField';
 import PublicNavBar from '@/components/PublicNavBar';
+import PasskeyManager from '@/components/wallet/PasskeyManager';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AppPage } from '@/lib/cardforge';
 
 const Account = () => {
   const navigate = useNavigate();
-  const { userData, signOut, truncateAddress } = useStacksAuth();
+  const { userData, signOut, truncateAddress, walletKind } = useStacksAuth();
   const [cardCount, setCardCount] = useState<number | null>(null);
   const [rarityCounts, setRarityCounts] = useState<Record<string, number>>({});
   const [tradeCount, setTradeCount] = useState(0);
@@ -287,6 +288,25 @@ const Account = () => {
               ))}
             </div>
           </div>
+
+          {/* Embedded wallet + passkeys */}
+          {walletKind === 'embedded' && (
+            <div className="flex flex-col gap-4 mb-6">
+              <button
+                onClick={() => navigate('/wallet')}
+                className="font-ui font-semibold text-sm px-5 py-2.5 rounded-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95 text-left"
+                style={{
+                  color: '#0a0a14',
+                  background: 'linear-gradient(135deg, #ff6a5a, #e0483a)',
+                  boxShadow: '0 6px 20px rgba(224,72,58,0.3)',
+                }}
+              >
+                👛 Open Wallet — deposit, send STX, transfer NFTs
+              </button>
+              <PasskeyManager />
+            </div>
+          )}
+          {walletKind === 'connect' && <PasskeyManager />}
 
           {/* Quick actions */}
           <div className="flex flex-wrap gap-3">

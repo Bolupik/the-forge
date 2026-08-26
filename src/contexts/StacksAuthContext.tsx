@@ -10,6 +10,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { connect, disconnect, isConnected } from "@stacks/connect";
 import { supabase } from "@/integrations/supabase/client";
+import { signInWithPasskey, signUpWithPasskey } from "@/lib/passkeyAuth";
+import { createWalletForPasskey, getVaultAddress, lockWallet } from "@/lib/walletVault";
+import { getSelectedNetwork } from "@/lib/stacksMint";
 
 export interface StacksUserData {
   address: string;
