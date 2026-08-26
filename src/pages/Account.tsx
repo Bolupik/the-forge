@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ParticleField from '@/components/ParticleField';
 import PublicNavBar from '@/components/PublicNavBar';
+import PasskeyManager from '@/components/wallet/PasskeyManager';
 import { useStacksAuth } from '@/contexts/StacksAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AppPage } from '@/lib/cardforge';
