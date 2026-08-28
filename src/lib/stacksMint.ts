@@ -463,49 +463,15 @@ export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPack
   );
   const functionArgs: ClarityValue[] = [Cl.list(cardTuples)];
 
-  const network = stacksNetworkObj(cfg.network);
-
-  const addrRes = (await request('stx_getAddresses')) as {
-    addresses?: Array<{ address: string; publicKey: string }>;
-  };
-  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
-  const publicKey = stxEntry?.publicKey;
-  const senderAddress = stxEntry?.address;
-  if (!publicKey || !senderAddress) {
-    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
-  }
-  if (!validateStacksAddress(senderAddress)) {
-    throw new Error(`Your wallet returned an invalid Stacks address ("${senderAddress}"). Reconnect the wallet and make sure it is on ${network === STACKS_MAINNET ? 'mainnet' : 'testnet'}.`);
-  }
-
-  const nonce = await fetchNonce({ address: senderAddress, network });
-
-  const unsigned = await makeUnsignedContractCall({
-    contractAddress: cfg.address,
-    contractName: cfg.name,
+  // A flat fee skips the pre-sign /v2/fees/transaction estimate, which hangs on
+  // testnet for the larger mint-pack payload.
+  const txid = await signAndBroadcastCall({
+    cfg,
     functionName: 'mint-pack',
     functionArgs,
-    publicKey,
-    network,
-    nonce,
-    // Explicit fee skips makeUnsignedContractCall's pre-sign call to
-    // /v2/fees/transaction. On testnet that estimate hangs/500s for the larger
-    // mint-pack payload, so the promise never reaches stx_signTransaction and
-    // the wallet modal never opens. A flat 0.2 STX fee is safe for a batch call.
     fee: BigInt(300000),
-    postConditionMode: PostConditionMode.Allow,
-    postConditions: [],
   });
 
-  const signRes = (await request('stx_signTransaction', {
-    transaction: serializeTransaction(unsigned),
-    broadcast: false,
-  })) as { transaction?: string };
-  const signedHex = signRes?.transaction;
-  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
-
-  const signedTx = deserializeTransaction(signedHex);
-  const txid = await broadcastRawTx(serializeTransaction(signedTx), cfg.network);
 
   // One tx covers the whole pack — persist the shared txid on every card row.
   await Promise.all(
