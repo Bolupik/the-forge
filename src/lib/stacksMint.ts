@@ -2,6 +2,7 @@ import { request } from '@stacks/connect';
 import {
   Cl,
   makeUnsignedContractCall,
+  makeContractCall,
   serializeTransaction,
   deserializeTransaction,
   PostConditionMode,
@@ -12,7 +13,9 @@ import {
 import { readEdgeError } from '@/lib/edgeError';
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 import { supabase } from '@/integrations/supabase/client';
+import { getSigningKey, getVaultAddress, hasEmbeddedWallet } from '@/lib/walletVault';
 import type { NFTCard } from '@/lib/cardforge';
+
 
 export type StacksNetwork = 'mainnet' | 'testnet';
 
