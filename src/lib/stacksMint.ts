@@ -385,56 +385,14 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     Cl.stringAscii(tokenUri),
   ];
 
-  // --- Sign-only + self-broadcast --------------------------------------------
-  // We do NOT use stx_callContract, because that makes the WALLET broadcast the
-  // signed tx. Xverse's Testnet4 broadcast returns a non-JSON body that surfaces
-  // as "Failed to broadcast transaction (unable to parse node response)".
-  // Instead: fetch the signer's public key, build the unsigned tx ourselves,
-  // ask the wallet to SIGN ONLY, then POST the signed tx to a healthy Hiro node.
-
-  const network = stacksNetworkObj(cfg.network);
-
-  // 1. Public key for the connected account (needed to build the unsigned tx).
-  const addrRes = (await request('stx_getAddresses')) as {
-    addresses?: Array<{ address: string; publicKey: string }>;
-  };
-  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
-  const publicKey = stxEntry?.publicKey;
-  const senderAddress = stxEntry?.address;
-  if (!publicKey || !senderAddress) {
-    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
-  }
-
-  // 2. Current nonce for the signer.
-  const nonce = await fetchNonce({ address: senderAddress, network });
-
-  // 3. Build the unsigned contract-call tx. Allow-mode: the contract itself
-  //    performs the STX transfer of mint-price to the treasury.
-  const unsigned = await makeUnsignedContractCall({
-    contractAddress: cfg.address,
-    contractName: cfg.name,
+  // Sign (passkey vault locally, or external wallet sign-only) + self-broadcast.
+  const txid = await signAndBroadcastCall({
+    cfg,
     functionName: 'mint-card',
     functionArgs,
-    publicKey,
-    network,
-    nonce,
-    fee: BigInt(200000), // explicit fee skips the pre-sign /v2/fees/transaction call that hangs on testnet
-    postConditionMode: PostConditionMode.Allow,
-    postConditions: [],
+    fee: BigInt(200000),
   });
 
-  // 4. Ask the wallet to sign (but not broadcast) the serialized tx.
-  const signRes = (await request('stx_signTransaction', {
-    transaction: serializeTransaction(unsigned),
-    broadcast: false,
-  })) as { transaction?: string };
-  const signedHex = signRes?.transaction;
-  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
-
-  // 5. Broadcast the signed tx ourselves to a node we trust.
-  //    deserialize→reserialize normalizes whatever hex form the wallet returns.
-  const signedTx = deserializeTransaction(signedHex);
-  const txid = await broadcastRawTx(serializeTransaction(signedTx), cfg.network);
 
   await supabase
     .from('nft_cards')
