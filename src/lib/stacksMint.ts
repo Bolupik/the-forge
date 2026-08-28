@@ -222,6 +222,87 @@ const broadcastRawTx = async (rawTxHex: string, network: StacksNetwork): Promise
   return txid.startsWith('0x') ? txid : `0x${txid}`;
 };
 
+/**
+ * Sign a contract call and broadcast it ourselves.
+ *
+ * Two signer paths:
+ *  - embedded (passkey wallet): the 24-word vault on this device holds the key,
+ *    so we sign locally. No Stacks Connect modal, so passkey-only users never
+ *    see the "Connect a wallet / install Leather or Xverse" dialog.
+ *  - connect (Xverse / Leather): build unsigned, ask the wallet to sign only,
+ *    then broadcast to a Hiro node we trust.
+ */
+const signAndBroadcastCall = async (args: {
+  cfg: ContractConfig;
+  functionName: string;
+  functionArgs: ClarityValue[];
+  fee: bigint;
+}): Promise<string> => {
+  const { cfg, functionName, functionArgs, fee } = args;
+  const network = stacksNetworkObj(cfg.network);
+
+  // --- embedded passkey wallet: local signing -----------------------------
+  if (hasEmbeddedWallet()) {
+    const senderAddress = getVaultAddress(cfg.network);
+    if (!senderAddress) {
+      throw new Error('Your passkey wallet has no address for this network. Open the Wallet page and restore it.');
+    }
+    const senderKey = await getSigningKey(); // triggers the passkey unlock prompt
+    const nonce = await fetchNonce({ address: senderAddress, network });
+    const tx = await makeContractCall({
+      contractAddress: cfg.address,
+      contractName: cfg.name,
+      functionName,
+      functionArgs,
+      senderKey,
+      network,
+      nonce,
+      fee,
+      postConditionMode: PostConditionMode.Allow,
+      postConditions: [],
+    });
+    return broadcastRawTx(serializeTransaction(tx), cfg.network);
+  }
+
+  // --- external wallet: sign-only via Stacks Connect -----------------------
+  const addrRes = (await request('stx_getAddresses')) as {
+    addresses?: Array<{ address: string; publicKey: string }>;
+  };
+  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
+  const publicKey = stxEntry?.publicKey;
+  const senderAddress = stxEntry?.address;
+  if (!publicKey || !senderAddress) {
+    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
+  }
+  if (!validateStacksAddress(senderAddress)) {
+    throw new Error(`Your wallet returned an invalid Stacks address ("${senderAddress}"). Reconnect it on ${cfg.network}.`);
+  }
+
+  const nonce = await fetchNonce({ address: senderAddress, network });
+  const unsigned = await makeUnsignedContractCall({
+    contractAddress: cfg.address,
+    contractName: cfg.name,
+    functionName,
+    functionArgs,
+    publicKey,
+    network,
+    nonce,
+    fee,
+    postConditionMode: PostConditionMode.Allow,
+    postConditions: [],
+  });
+
+  const signRes = (await request('stx_signTransaction', {
+    transaction: serializeTransaction(unsigned),
+    broadcast: false,
+  })) as { transaction?: string };
+  const signedHex = signRes?.transaction;
+  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
+
+  const signedTx = deserializeTransaction(signedHex);
+  return broadcastRawTx(serializeTransaction(signedTx), cfg.network);
+};
+
 
 interface MintArgs {
   card: NFTCard;
