@@ -2,6 +2,7 @@ import { request } from '@stacks/connect';
 import {
   Cl,
   makeUnsignedContractCall,
+  makeContractCall,
   serializeTransaction,
   deserializeTransaction,
   PostConditionMode,
@@ -12,7 +13,9 @@ import {
 import { readEdgeError } from '@/lib/edgeError';
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 import { supabase } from '@/integrations/supabase/client';
+import { getSigningKey, getVaultAddress, hasEmbeddedWallet } from '@/lib/walletVault';
 import type { NFTCard } from '@/lib/cardforge';
+
 
 export type StacksNetwork = 'mainnet' | 'testnet';
 
@@ -219,6 +222,87 @@ const broadcastRawTx = async (rawTxHex: string, network: StacksNetwork): Promise
   return txid.startsWith('0x') ? txid : `0x${txid}`;
 };
 
+/**
+ * Sign a contract call and broadcast it ourselves.
+ *
+ * Two signer paths:
+ *  - embedded (passkey wallet): the 24-word vault on this device holds the key,
+ *    so we sign locally. No Stacks Connect modal, so passkey-only users never
+ *    see the "Connect a wallet / install Leather or Xverse" dialog.
+ *  - connect (Xverse / Leather): build unsigned, ask the wallet to sign only,
+ *    then broadcast to a Hiro node we trust.
+ */
+const signAndBroadcastCall = async (args: {
+  cfg: ContractConfig;
+  functionName: string;
+  functionArgs: ClarityValue[];
+  fee: bigint;
+}): Promise<string> => {
+  const { cfg, functionName, functionArgs, fee } = args;
+  const network = stacksNetworkObj(cfg.network);
+
+  // --- embedded passkey wallet: local signing -----------------------------
+  if (hasEmbeddedWallet()) {
+    const senderAddress = getVaultAddress(cfg.network);
+    if (!senderAddress) {
+      throw new Error('Your passkey wallet has no address for this network. Open the Wallet page and restore it.');
+    }
+    const senderKey = await getSigningKey(); // triggers the passkey unlock prompt
+    const nonce = await fetchNonce({ address: senderAddress, network });
+    const tx = await makeContractCall({
+      contractAddress: cfg.address,
+      contractName: cfg.name,
+      functionName,
+      functionArgs,
+      senderKey,
+      network,
+      nonce,
+      fee,
+      postConditionMode: PostConditionMode.Allow,
+      postConditions: [],
+    });
+    return broadcastRawTx(serializeTransaction(tx), cfg.network);
+  }
+
+  // --- external wallet: sign-only via Stacks Connect -----------------------
+  const addrRes = (await request('stx_getAddresses')) as {
+    addresses?: Array<{ address: string; publicKey: string }>;
+  };
+  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
+  const publicKey = stxEntry?.publicKey;
+  const senderAddress = stxEntry?.address;
+  if (!publicKey || !senderAddress) {
+    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
+  }
+  if (!validateStacksAddress(senderAddress)) {
+    throw new Error(`Your wallet returned an invalid Stacks address ("${senderAddress}"). Reconnect it on ${cfg.network}.`);
+  }
+
+  const nonce = await fetchNonce({ address: senderAddress, network });
+  const unsigned = await makeUnsignedContractCall({
+    contractAddress: cfg.address,
+    contractName: cfg.name,
+    functionName,
+    functionArgs,
+    publicKey,
+    network,
+    nonce,
+    fee,
+    postConditionMode: PostConditionMode.Allow,
+    postConditions: [],
+  });
+
+  const signRes = (await request('stx_signTransaction', {
+    transaction: serializeTransaction(unsigned),
+    broadcast: false,
+  })) as { transaction?: string };
+  const signedHex = signRes?.transaction;
+  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
+
+  const signedTx = deserializeTransaction(signedHex);
+  return broadcastRawTx(serializeTransaction(signedTx), cfg.network);
+};
+
 
 interface MintArgs {
   card: NFTCard;
@@ -301,56 +385,14 @@ export const mintCardOnChain = async ({ card }: MintArgs): Promise<MintResult> =
     Cl.stringAscii(tokenUri),
   ];
 
-  // --- Sign-only + self-broadcast --------------------------------------------
-  // We do NOT use stx_callContract, because that makes the WALLET broadcast the
-  // signed tx. Xverse's Testnet4 broadcast returns a non-JSON body that surfaces
-  // as "Failed to broadcast transaction (unable to parse node response)".
-  // Instead: fetch the signer's public key, build the unsigned tx ourselves,
-  // ask the wallet to SIGN ONLY, then POST the signed tx to a healthy Hiro node.
-
-  const network = stacksNetworkObj(cfg.network);
-
-  // 1. Public key for the connected account (needed to build the unsigned tx).
-  const addrRes = (await request('stx_getAddresses')) as {
-    addresses?: Array<{ address: string; publicKey: string }>;
-  };
-  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
-  const publicKey = stxEntry?.publicKey;
-  const senderAddress = stxEntry?.address;
-  if (!publicKey || !senderAddress) {
-    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
-  }
-
-  // 2. Current nonce for the signer.
-  const nonce = await fetchNonce({ address: senderAddress, network });
-
-  // 3. Build the unsigned contract-call tx. Allow-mode: the contract itself
-  //    performs the STX transfer of mint-price to the treasury.
-  const unsigned = await makeUnsignedContractCall({
-    contractAddress: cfg.address,
-    contractName: cfg.name,
+  // Sign (passkey vault locally, or external wallet sign-only) + self-broadcast.
+  const txid = await signAndBroadcastCall({
+    cfg,
     functionName: 'mint-card',
     functionArgs,
-    publicKey,
-    network,
-    nonce,
-    fee: BigInt(200000), // explicit fee skips the pre-sign /v2/fees/transaction call that hangs on testnet
-    postConditionMode: PostConditionMode.Allow,
-    postConditions: [],
+    fee: BigInt(200000),
   });
 
-  // 4. Ask the wallet to sign (but not broadcast) the serialized tx.
-  const signRes = (await request('stx_signTransaction', {
-    transaction: serializeTransaction(unsigned),
-    broadcast: false,
-  })) as { transaction?: string };
-  const signedHex = signRes?.transaction;
-  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
-
-  // 5. Broadcast the signed tx ourselves to a node we trust.
-  //    deserialize→reserialize normalizes whatever hex form the wallet returns.
-  const signedTx = deserializeTransaction(signedHex);
-  const txid = await broadcastRawTx(serializeTransaction(signedTx), cfg.network);
 
   await supabase
     .from('nft_cards')
@@ -421,49 +463,15 @@ export const mintPackOnChain = async ({ cards }: MintPackArgs): Promise<MintPack
   );
   const functionArgs: ClarityValue[] = [Cl.list(cardTuples)];
 
-  const network = stacksNetworkObj(cfg.network);
-
-  const addrRes = (await request('stx_getAddresses')) as {
-    addresses?: Array<{ address: string; publicKey: string }>;
-  };
-  const stxEntry = addrRes?.addresses?.find((a) => a.address?.startsWith('S'));
-  const publicKey = stxEntry?.publicKey;
-  const senderAddress = stxEntry?.address;
-  if (!publicKey || !senderAddress) {
-    throw new Error('Could not read your wallet public key. Reconnect the wallet and try again.');
-  }
-  if (!validateStacksAddress(senderAddress)) {
-    throw new Error(`Your wallet returned an invalid Stacks address ("${senderAddress}"). Reconnect the wallet and make sure it is on ${network === STACKS_MAINNET ? 'mainnet' : 'testnet'}.`);
-  }
-
-  const nonce = await fetchNonce({ address: senderAddress, network });
-
-  const unsigned = await makeUnsignedContractCall({
-    contractAddress: cfg.address,
-    contractName: cfg.name,
+  // A flat fee skips the pre-sign /v2/fees/transaction estimate, which hangs on
+  // testnet for the larger mint-pack payload.
+  const txid = await signAndBroadcastCall({
+    cfg,
     functionName: 'mint-pack',
     functionArgs,
-    publicKey,
-    network,
-    nonce,
-    // Explicit fee skips makeUnsignedContractCall's pre-sign call to
-    // /v2/fees/transaction. On testnet that estimate hangs/500s for the larger
-    // mint-pack payload, so the promise never reaches stx_signTransaction and
-    // the wallet modal never opens. A flat 0.2 STX fee is safe for a batch call.
     fee: BigInt(300000),
-    postConditionMode: PostConditionMode.Allow,
-    postConditions: [],
   });
 
-  const signRes = (await request('stx_signTransaction', {
-    transaction: serializeTransaction(unsigned),
-    broadcast: false,
-  })) as { transaction?: string };
-  const signedHex = signRes?.transaction;
-  if (!signedHex) throw new Error('Wallet did not return a signed transaction');
-
-  const signedTx = deserializeTransaction(signedHex);
-  const txid = await broadcastRawTx(serializeTransaction(signedTx), cfg.network);
 
   // One tx covers the whole pack — persist the shared txid on every card row.
   await Promise.all(
